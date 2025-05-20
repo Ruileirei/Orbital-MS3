@@ -37,6 +37,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "42354216-d084-4f0c-94e1-ce76398ce231"
+      }
+    },
+    "owner": "reiruilei"
   }
 }
