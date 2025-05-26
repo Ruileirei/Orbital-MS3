@@ -4,6 +4,7 @@ const LoginStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f2f5',
     justifyContent: 'center',
+    padding: 20,
     alignItems: 'center',
   },
   loginBox: {

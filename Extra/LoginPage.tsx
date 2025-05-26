@@ -1,14 +1,17 @@
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import LoginStyles from './LoginPageStyle';
+import LoginStyles from '../Components/LoginPageStyle';
+import { RootStack } from './Root';
 
+type LoginScreenNavigationProp = NativeStackNavigationProp<RootStack, 'Login'>;
 
 const LoginScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<LoginScreenNavigationProp>();
   const handleLogin = () => {
+    navigation.navigate('Main');
     Alert.alert('Login pressed');
-    //navigation.navigate('Main')
     //else: throw error or wtv
     
   };
