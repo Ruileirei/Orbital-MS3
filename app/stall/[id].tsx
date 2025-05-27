@@ -26,7 +26,7 @@ const StallInfo = () => {
         <Image
             source={{uri: item}}
             style={StallStyle.carouselImage}
-            resizeMode="cover"
+            resizeMode="contain"
         />
     );
 

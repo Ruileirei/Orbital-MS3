@@ -1,11 +1,11 @@
+import BotNavBar from '@/Components/navigationBar';
 import { DATA } from '@/Components/SampleData';
-import { SearchBar } from '@rneui/themed';
+import { Icon, SearchBar } from '@rneui/themed';
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
-import { FlatList, Text, TouchableOpacity } from "react-native";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import SearchStyle from "../Components/SearchStyle";
-
 
 const MainScreen = () => {
     const router = useRouter();
@@ -25,6 +25,10 @@ const MainScreen = () => {
         });
     };
 
+    const handleFilter = () => {
+        router.push('/filter');
+    };
+
     const searchFunction = (text: string) => {
         const filtered = arrayholder.current.filter((item) => {
             const itemData = item.title.toUpperCase();
@@ -39,10 +43,8 @@ const MainScreen = () => {
     const Item = ({ item }: {item: { id: string; title: string; cuisine: string; rating: number }}) => (
         <TouchableOpacity 
             onPress={() => navigateStall(item)}
-            style = {{padding: 20,
-                      borderBottomWidth: 1
-                    }}>
-            <Text style={{fontSize: 18}}>
+            style = {SearchStyle.itemButton}>
+            <Text style={{fontSize: 18, fontWeight: '600', marginBottom: 4}}>
                 {item.title}
             </Text>
             <Text>{item.cuisine} • ⭐ {item.rating}</Text>
@@ -50,17 +52,36 @@ const MainScreen = () => {
     );
 
     return (
-        <SafeAreaProvider>
+        <SafeAreaProvider style={{flex: 1}}>
             <SafeAreaView style={SearchStyle.container}>
-                <SearchBar
-                placeholder="Find food near you..."
-                onChangeText={searchFunction}
-                value={searchValue}/>
-                <FlatList
-                    data={data}
-                    renderItem={({item}) => <Item item={item}/>}
-                    keyExtractor={(item) => item.id}
-                />
+                <View style={{flex: 1}}>
+                    <View style={SearchStyle.searchFilter}>
+                        <View style={{flex: 1}}>
+                            <SearchBar
+                                containerStyle={SearchStyle.searchBar}
+                                placeholder="Find food near you..."
+                                onChangeText={searchFunction}
+                                value={searchValue}
+                            />
+                        </View>
+                        <TouchableOpacity onPress={handleFilter} style={{marginLeft: 10}}>
+                            <Icon name='filter-list' 
+                                  type='material'
+                                  size={30}
+                                  color='gray'
+                                  />
+                        </TouchableOpacity>
+                    </View>
+                    <FlatList
+                        data={data}
+                        renderItem={({item}) => <Item item={item}/>}
+                        keyExtractor={(item) => item.id}
+                        ListEmptyComponent={() => 
+                            <Text>No match found</Text>
+                        }
+                    />
+                </View>       
+                <BotNavBar/>
             </SafeAreaView>
         </SafeAreaProvider>
     );

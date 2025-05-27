@@ -28,6 +28,7 @@ const StallStyle = StyleSheet.create ({
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: 'transparent',
     },
 });
 export default StallStyle;

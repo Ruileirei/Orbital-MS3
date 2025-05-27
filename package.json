@@ -15,6 +15,7 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
+    "@react-navigation/stack": "^7.3.2",
     "@rneui/base": "^4.0.0-rc.8",
     "@rneui/themed": "github:react-native-elements/react-native-elements#themed",
     "expo": "~53.0.9",
