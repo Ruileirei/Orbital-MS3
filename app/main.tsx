@@ -1,19 +1,51 @@
 import BotNavBar from '@/Components/navigationBar';
-import { DATA } from '@/Components/SampleData';
+import StarRating from '@/Components/starRating';
+import { db } from '@/firebase/firebaseConfig';
 import { Icon, SearchBar } from '@rneui/themed';
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { collection, getDocs } from 'firebase/firestore';
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import SearchStyle from "../Components/SearchStyle";
 
+interface Stall {
+    id: string;
+    title: string;
+    cuisine: string;
+    rating: number;
+}
+
 const MainScreen = () => {
     const router = useRouter();
-    const [data, setData] = useState(DATA);
+    const [data, setData] = useState<Stall[]>([]);
     const [searchValue, setSearchValue] = useState('');
-    const arrayholder = useRef(DATA);
+    const arrayholder = useRef<Stall[]>([]);
 
-    const navigateStall = (item: typeof DATA[number]) => {
+    useEffect(() => {
+        async function fetchStalls() {
+            try {
+                const queryRes = await getDocs(collection(db, "stalls"));
+                const stalls: Stall[] = [];
+                queryRes.forEach((doc) => {
+                    const stallData = doc.data();
+                    stalls.push({
+                        id: doc.id,
+                        title: stallData.name ?? "",
+                        cuisine: stallData.cuisine ?? "",
+                        rating: stallData.rating ?? 0,
+                    });
+                });
+                setData(stalls);
+                arrayholder.current = stalls;
+            } catch (error) {
+                console.error("Error fetching stalls");
+            }
+        }
+        fetchStalls();
+    }, []);
+
+    const navigateStall = (item: Stall) => {
         router.push({
             pathname: '/stall/[id]',
             params: {
@@ -26,7 +58,8 @@ const MainScreen = () => {
     };
 
     const handleFilter = () => {
-        router.push('/filter');
+        Alert.alert(":(","Filter coming soon!");
+        //router.push('/filter');
     };
 
     const searchFunction = (text: string) => {
@@ -40,14 +73,17 @@ const MainScreen = () => {
     }
 
 
-    const Item = ({ item }: {item: { id: string; title: string; cuisine: string; rating: number }}) => (
+    const Item = ({ item }: {item: Stall}) => (
         <TouchableOpacity 
             onPress={() => navigateStall(item)}
             style = {SearchStyle.itemButton}>
             <Text style={{fontSize: 18, fontWeight: '600', marginBottom: 4}}>
                 {item.title}
             </Text>
-            <Text>{item.cuisine} • ⭐ {item.rating}</Text>
+            <View style={{flexDirection:'row', alignItems:'center'}}>
+                <Text>{item.cuisine} </Text>
+                <StarRating rating={item.rating} size={14} />
+            </View>
         </TouchableOpacity>
     );
 

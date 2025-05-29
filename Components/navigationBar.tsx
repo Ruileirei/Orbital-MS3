@@ -3,6 +3,7 @@ import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import NavBarStyle from "./NavBarStyle";
+
 const BotNavBar = () => {
     const router = useRouter();
     const pathName = usePathname();
@@ -25,7 +26,7 @@ const BotNavBar = () => {
 
             <TouchableOpacity
                 style={NavBarStyle.navButton}
-                onPress={() => alert('Map coming soon')}>
+                onPress={() => router.push('/Map')}>
                 <MaterialIcons
                     name="map"
                     size={28}
