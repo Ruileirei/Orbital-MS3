@@ -37,3 +37,9 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Obsolete and private files
+Extra/
+serviceAccountKey/
+firebase/
+foodfindr/
