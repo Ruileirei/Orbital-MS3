@@ -41,5 +41,4 @@ app-example
 # Obsolete and private files
 Extra/
 firebase/serviceAccountKey/
-firebase/userAuth.ts
 foodfindr/
