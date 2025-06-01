@@ -2,6 +2,7 @@ import MapStyle from "@/Components/MapsPageStyle";
 import StarRating from "@/Components/starRating";
 import { db } from "@/firebase/firebaseConfig";
 import { Feather } from '@expo/vector-icons';
+import { useRouter } from "expo-router";
 import { collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -29,6 +30,7 @@ const MapScreen: React.FC = () => {
     const [stalls, setStalls] = useState<Stall[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedStall, setSelectedStall] = useState<Stall | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchStalls = async () => {
@@ -48,6 +50,18 @@ const MapScreen: React.FC = () => {
         };
         fetchStalls();
     }, []);
+
+    const navStall = (item: Stall) => {
+        router.push({
+            pathname:'/stall/[id]',
+            params: {
+                id: item.id,
+                title: item.name,
+                cuisine: item.cuisine,
+                rating: item.rating.toString(),
+            }
+        });
+    }
 
     if (loading) {
         return (
@@ -86,6 +100,12 @@ const MapScreen: React.FC = () => {
                         {selectedStall.location && (
                             <Text style={MapStyle.location}>{selectedStall.location}</Text>
                         )}
+                        <TouchableOpacity
+                            style={MapStyle.navStall}
+                            onPress={() => navStall(selectedStall)}>
+                            <Text style={MapStyle.navText}>See More</Text>
+                        </TouchableOpacity>
+
                         <TouchableOpacity 
                             style={MapStyle.closeIcon}
                             onPress={() => setSelectedStall(null)}>

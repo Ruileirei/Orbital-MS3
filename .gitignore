@@ -40,6 +40,6 @@ app-example
 
 # Obsolete and private files
 Extra/
-serviceAccountKey/
-firebase/
+firebase/serviceAccountKey/
+firebase/userAuth.ts
 foodfindr/

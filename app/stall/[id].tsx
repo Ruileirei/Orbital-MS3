@@ -1,10 +1,11 @@
 import StallStyle from "@/Components/StallPageStyle";
 import StarRating from "@/Components/starRating";
 import { db } from "@/firebase/firebaseConfig";
+import { Icon } from "@rneui/themed";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, Image, Text, View } from "react-native";
+import { ActivityIndicator, Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
 import Carousel from 'react-native-reanimated-carousel';
 
 const {width: screenWidth} = Dimensions.get('window');
@@ -21,6 +22,8 @@ const StallInfo = () => {
         menu?: string[];
     }>(null);
     const [loading, setLoading] = useState(true);
+    const [isSaved, setIsSaved] = useState(false);
+    
 
     useLayoutEffect(() => {
         if (title) {
@@ -53,7 +56,6 @@ const StallInfo = () => {
         }
         fetchStall();
     }, [id]);
-   
 
     const images = React.useMemo(() => {
         if (!stallData) return [];
@@ -61,7 +63,7 @@ const StallInfo = () => {
         const menuPics = stallData.menu ?? [];
         return menuPics.length > 0
                ? menuPics
-               : ["https://img.freepik.com/free-vector/vector-illustration-design-fast-food-restaurant-menu-cafe-with-hand-drawn-graphics_1441-260.jpg"];
+               : ["https://png.pngtree.com/png-vector/20221109/ourmid/pngtree-no-image-available-icon-flatvector-illustration-graphic-available-coming-vector-png-image_40958834.jpg"];
     }, [stallData]);
 
     const renderCarouselItem = ({item}: {item: string}) => (
@@ -90,6 +92,14 @@ const StallInfo = () => {
 
     return (
         <View style={StallStyle.container}>
+            <TouchableOpacity onPress={() => setIsSaved(true)} style={StallStyle.saveIcon}>
+                <Icon 
+                    name={isSaved ? 'heart' : 'heart-o'}
+                    type='font-awesome'
+                    size={24}
+                    color={isSaved ? 'red' : 'gray'}
+                />
+            </TouchableOpacity>
             <Text style={StallStyle.title}>{stallData.name ?? title}</Text>
             <Text style={StallStyle.subtitle}> Cuisine: {stallData.cuisine ?? cuisine}</Text>
             <View style={{flexDirection:'row', alignItems:'center', marginVertical: 4}}>

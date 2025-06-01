@@ -30,5 +30,11 @@ const StallStyle = StyleSheet.create ({
         alignItems: 'center',
         backgroundColor: 'transparent',
     },
+    saveIcon: {
+        position: 'absolute',
+        top: 24,
+        right: 20,
+        zIndex: 10,
+    },
 });
 export default StallStyle;

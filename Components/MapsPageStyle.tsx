@@ -75,13 +75,23 @@ const MapStyle = StyleSheet.create({
         top: 0,
         right: -4,
         zIndex: 10,
-        backgroundColor: 'gray',
+        backgroundColor: 'transparent',
         borderRadius: 12,
         width: 24,
         height: 24,
         alignItems: 'center',
         justifyContent: 'center'
     },
+    navStall: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: "#007bff",
+        borderRadius: 5,
+    },
+    navText: {
+        color: "white",
+        fontWeight: "bold"
+    }
 });
 
 export default MapStyle;
