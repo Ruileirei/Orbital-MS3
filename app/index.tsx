@@ -47,34 +47,53 @@ const LoginScreen = () => {
 
     return (
         <View style={LoginStyles.container}>
-      <View style={LoginStyles.loginBox}>
-        <Text style={LoginStyles.title}>Login</Text>
-        <TextInput
-          style={LoginStyles.input}
-          placeholder="Email/Phone Number"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={LoginStyles.input}
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        <TouchableOpacity style={LoginStyles.button} onPress={checkLogin} disabled={loading}>
-          <Text style={LoginStyles.buttonText}>Login</Text>
-        </TouchableOpacity>
-        <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={LoginStyles.registerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={checkRegister}>
-            <Text style={LoginStyles.link}>Register</Text>
+          <View style={LoginStyles.topContainer}>
+            {/* Logo and tagline */}
+            <View style={LoginStyles.logoContainer}>
+              <Text style={LoginStyles.tagline}>Welcome to FoodFindr!</Text>
+            </View>
+
+            {/* Login Box */}
+            <View style={LoginStyles.loginBox}>
+              <Text style={LoginStyles.title}>Login</Text>
+              <TextInput
+                style={LoginStyles.input}
+                placeholder="Email/Phone Number"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+              />
+              <TextInput
+                style={LoginStyles.input}
+                placeholder="Password"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
+
+            {/* Login Button (outside the box, right-aligned) */}
+            <View style={LoginStyles.loginButtonWrapper}>
+              <TouchableOpacity
+                style={[LoginStyles.loginbutton, loading && LoginStyles.buttonDisabled]}
+                onPress={checkLogin}
+                disabled={loading}
+              >
+                <Text style={LoginStyles.buttonText}>Login</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Register link fixed at bottom */}
+          <View style={LoginStyles.bottomRegister}>
+            <Text style={LoginStyles.registerText}>Don't have an account? </Text>
+            <TouchableOpacity onPress={checkRegister}>
+              <Text style={LoginStyles.link}>Register</Text>
             </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </View>
+      
   );
 };
 
