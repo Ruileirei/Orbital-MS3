@@ -5,14 +5,17 @@ import { Icon } from "@rneui/themed";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Dimensions, Image, Modal, Text, TouchableOpacity, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import Carousel from 'react-native-reanimated-carousel';
-
 const {width: screenWidth} = Dimensions.get('window');
 
 const StallInfo = () => {
     const {id, title, cuisine, rating} = useLocalSearchParams();
-    const navigation = useNavigation();
+    const navigation= useNavigation();
+    const [isImageVisible, setImageVisible] = useState(false);
+    const [selectImage, setSelectImage] = useState(0);
 
     const [stallData, setStallData] = useState<null | {
         name: string;
@@ -24,6 +27,33 @@ const StallInfo = () => {
     const [loading, setLoading] = useState(true);
     const [isSaved, setIsSaved] = useState(false);
     
+    const scale = useSharedValue(1);
+    const focalX = useSharedValue(0);
+    const focalY = useSharedValue(0);
+
+    const pinchHandler = Gesture.Pinch()
+        .onUpdate((e) => {
+            scale.value = e.scale;
+            focalX.value = e.focalX;
+            focalY.value = e.focalY;
+        })
+        .onEnd(() => {
+            scale.value = withTiming(1);
+        });
+
+    const animatedImageStyle = useAnimatedStyle(() => ({
+        transform: [
+            { translateX: focalX.value },
+            { translateY: focalY.value },
+            { translateX: -screenWidth / 2 },
+            { translateY: -screenWidth / 2 },
+            { scale: scale.value },
+            { translateX: -focalX.value },
+            { translateY: -focalY.value },
+            { translateX: screenWidth / 2 },
+            { translateY: screenWidth / 2 },
+        ],
+    }));
 
     useLayoutEffect(() => {
         if (title) {
@@ -66,12 +96,22 @@ const StallInfo = () => {
                : ["https://png.pngtree.com/png-vector/20221109/ourmid/pngtree-no-image-available-icon-flatvector-illustration-graphic-available-coming-vector-png-image_40958834.jpg"];
     }, [stallData]);
 
-    const renderCarouselItem = ({item}: {item: string}) => (
-        <Image
-            source={{uri: item}}
-            style={StallStyle.carouselImage}
-            resizeMode="contain"
-        />
+    const openImageViewer = (index: number) => {
+        setSelectImage(index);
+        setImageVisible(true);
+    };
+    const closeImageViewer = () => {
+        setImageVisible(false);
+    }
+
+    const renderCarouselItem = ({item, index}: {item: string, index: number}) => (
+        <TouchableOpacity onPress={() => openImageViewer(index)}>
+            <Image
+                source={{uri: item}}
+                style={StallStyle.carouselImage}
+                resizeMode="contain"
+            />
+        </TouchableOpacity>
     );
     
     if (loading) {
@@ -121,7 +161,34 @@ const StallInfo = () => {
                 autoPlay={false}
                 snapEnabled={images.length > 1}
             />
+            <Modal visible={isImageVisible} transparent={true} onRequestClose={closeImageViewer}>
+                <View style={{flex: 1, backgroundColor: "black"}}>
+                    <TouchableOpacity
+                        style={{position:"absolute", top: 40, right: 20, zIndex: 1}}
+                        onPress={closeImageViewer}
+                    >
+                        <Text style={{color:'white', fontSize: 18}}>X</Text>
+                    </TouchableOpacity>
+                    <GestureDetector gesture={pinchHandler}>
+                        <Animated.View style={{flex: 1, justifyContent: "center", alignItems:"center"}}>
+                            <Animated.Image
+                                source = {{uri:images[selectImage]}}
+                                style={[
+                                    {
+                                        width:"100%",
+                                        height:"100%",
+                                        resizeMode:"contain",
+                                    },
+                                    animatedImageStyle
+                                ]}
+                            />
+                        </Animated.View>
+                    </GestureDetector>
+                </View>
+            </Modal>
+
         </View>
+        
     );
 };
 

@@ -1,9 +1,9 @@
 import LoginStyles from "@/Components/LoginPageStyle";
+import { authenticateUser } from "@/firebase/userAuth";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { isFirebaseError } from "../firebase/FireBaseErrorChecking";
-import { authenticateUser } from "../firebase/userAuth";
 
 const LoginScreen = () => {
     const router = useRouter();
@@ -18,8 +18,8 @@ const LoginScreen = () => {
         } 
         setLoading(true);
         try {
-          const user = await authenticateUser(email, password);
-          if (user) {
+          const userCredential = await authenticateUser(email, password);
+          if (userCredential) {
             router.replace('/main');
           } else {
             Alert.alert("Invalid email or password")

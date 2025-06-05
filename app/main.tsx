@@ -2,10 +2,10 @@ import BotNavBar from '@/Components/navigationBar';
 import StarRating from '@/Components/starRating';
 import { db } from '@/firebase/firebaseConfig';
 import { Icon, SearchBar } from '@rneui/themed';
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { collection, getDocs } from 'firebase/firestore';
-import React, { useEffect, useRef, useState } from "react";
-import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import SearchStyle from "../Components/SearchStyle";
 
@@ -20,7 +20,21 @@ const MainScreen = () => {
     const router = useRouter();
     const [data, setData] = useState<Stall[]>([]);
     const [searchValue, setSearchValue] = useState('');
-    const arrayholder = useRef<Stall[]>([]);
+    const [stallsCache, setStallsCache] = useState<Stall[]>([]);
+    const params = useLocalSearchParams();
+    const cuisineParams = typeof params.cuisine === 'string' ? params.cuisine : "";
+    const selectedCuisine = cuisineParams ? cuisineParams.split(",") : [];
+
+    useEffect(() => {
+        if (stallsCache.length === 0) return;
+        if (selectedCuisine.length === 0) {
+            setData(stallsCache);
+        } else {
+            const filtered = stallsCache.filter(item =>
+            selectedCuisine.includes(item.cuisine));
+            setData(filtered);
+        }
+    }, [selectedCuisine.join(","), stallsCache]);
 
     useEffect(() => {
         async function fetchStalls() {
@@ -37,7 +51,7 @@ const MainScreen = () => {
                     });
                 });
                 setData(stalls);
-                arrayholder.current = stalls;
+                setStallsCache(stalls);
             } catch (error) {
                 console.error("Error fetching stalls");
             }
@@ -58,12 +72,14 @@ const MainScreen = () => {
     };
 
     const handleFilter = () => {
-        Alert.alert(":(","Filter coming soon!");
-        //router.push('/filter');
+        //Alert.alert(":(","Filter coming soon!");
+        router.push(`/filter?cuisine=${encodeURIComponent(selectedCuisine.join(","))}`);
     };
 
+
+
     const searchFunction = (text: string) => {
-        const filtered = arrayholder.current.filter((item) => {
+        const filtered = stallsCache.filter((item) => {
             const itemData = item.title.toUpperCase();
             const textData = text.toUpperCase();
             return itemData.includes(textData);
