@@ -21,7 +21,20 @@ const BotNavBar = () => {
                     color={isActive('/main') ? '#007bff' : 'gray'}
                 />
                 <Text 
-                    style={[NavBarStyle.navText, isActive('/main') && NavBarStyle.activeText]}> Home</Text>
+                    style={[NavBarStyle.navText, isActive('/main') && NavBarStyle.activeText]}>Home</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                style={NavBarStyle.navButton}
+                onPress={() => router.push('/nearby')}>
+                <MaterialIcons
+                    name="location-on"
+                    size={28}
+                    color={isActive('/nearby') ? '#007bff' : 'gray'}
+                />
+                <Text style={[NavBarStyle.navText, isActive('/nearby') && NavBarStyle.activeText]}>
+                    Nearby
+                </Text>
             </TouchableOpacity>
 
             <TouchableOpacity

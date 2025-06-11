@@ -1,14 +1,14 @@
 import BotNavBar from '@/Components/navigationBar';
 import StallItem from '@/Components/StallItem';
-import { db } from '@/firebase/firebaseConfig';
+import { geoQuery } from '@/utils/geoQuery';
+import { getUserLocation } from '@/utils/getUserLocation';
 import { getOpenStatus } from '@/utils/isOpenStatus';
-import { Icon, SearchBar } from '@rneui/themed';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { collection, getDocs } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { Icon } from '@rneui/themed';
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import SearchStyle from '../Components/SearchStyle';
+import SearchStyle from "../Components/SearchStyle";
 
 interface Stall {
     id: string;
@@ -20,74 +20,80 @@ interface Stall {
     };
     latitude: number;
     longitude: number;
+    distanceToUser?: number;
 }
 
-const MainScreen = () => {
+const NearbyScreen = () => {
     const router = useRouter();
     const [data, setData] = useState<Stall[]>([]);
     const [stallsCache, setStallsCache] = useState<Stall[]>([]);
+    const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
     const [currPage, setCurrPage] = useState(1);
-    const [searchValue, setSearchValue] = useState('');
 
     const pageSize = 10;
     const params = useLocalSearchParams();
-    const cuisineParams = typeof params.cuisine === 'string' ? params.cuisine : '';
-    const selectedCuisine = cuisineParams ? cuisineParams.split(',') : [];
+    const cuisineParams = typeof params.cuisine === 'string' ? params.cuisine : "";
+    const selectedCuisine = cuisineParams ? cuisineParams.split(",") : [];
     const hideClosed = params.hideClosed === 'true';
     const sortByParam = typeof params.sortBy === 'string' ? params.sortBy : 'None';
 
     useEffect(() => {
-        async function fetchStalls() {
+        async function fetchLocation() {
             try {
-                const queryRes = await getDocs(collection(db, 'stalls'));
-                const stalls: Stall[] = [];
-                queryRes.forEach((doc) => {
-                    const stallData = doc.data();
-                    stalls.push({
-                        id: doc.id,
-                        title: stallData.name ?? '',
-                        cuisine: stallData.cuisine ?? '',
-                        rating: stallData.rating ?? 0,
-                        openingHours: stallData.openingHours ?? {},
-                        latitude: stallData.latitude ?? 0,
-                        longitude: stallData.longitude ?? 0,
+                const location = await getUserLocation();
+                if (location && location.latitude !== undefined && location.longitude !== undefined) {
+                    setUserLocation({
+                        latitude: location.latitude,
+                        longitude: location.longitude,
                     });
-                });
-                setStallsCache(stalls);
-                setCurrPage(1);
+                }
             } catch (error) {
-                console.error('Error fetching stalls:', error);
+                console.error("Error getting user location:", error);
             }
         }
-        fetchStalls();
+        fetchLocation();
     }, []);
+
+    useEffect(() => {
+        const filtered = getFilteredStalls();
+        const startPage = (currPage - 1) * pageSize;
+        const paginated = filtered.slice(startPage, startPage + pageSize);
+        setData(paginated);
+    }, [selectedCuisine.join(","), hideClosed, sortByParam, stallsCache, currPage]);
+
+    useEffect(() => {
+    async function fetchNearbyStalls() {
+            if (!userLocation) return;
+            try {
+                const nearbyStalls = await geoQuery(userLocation.latitude, userLocation.longitude, 3000);
+                setStallsCache(nearbyStalls); // this is your master data
+                setCurrPage(1);
+            } catch (error) {
+                console.error("Error fetching nearby stalls");
+            }
+        }
+        fetchNearbyStalls();
+    }, [userLocation]);
 
     const getFilteredStalls = () => {
         let filtered = stallsCache;
 
         if (selectedCuisine.length > 0) {
-            filtered = filtered.filter((item) =>
+            filtered = filtered.filter(item =>
                 selectedCuisine.includes(item.cuisine)
             );
         }
 
         if (hideClosed) {
-            filtered = filtered.filter(
-                (item) => getOpenStatus(item.openingHours ?? {}) === 'OPEN'
-            );
-        }
-
-        if (sortByParam === 'High to Low') {
-            filtered.sort((a, b) => b.rating - a.rating);
-        } else if (sortByParam === 'Low to High') {
-            filtered.sort((a, b) => a.rating - b.rating);
-        }
-
-        if (searchValue.trim() !== '') {
-            const textData = searchValue.trim().toUpperCase();
             filtered = filtered.filter(item =>
-                item.title.toUpperCase().includes(textData)
+                getOpenStatus(item.openingHours ?? {}) === 'OPEN'
             );
+        }
+
+        if (userLocation) {
+            filtered = filtered
+                .filter(item => item.distanceToUser !== undefined && !isNaN(item.distanceToUser!))
+                .sort((a, b) => (a.distanceToUser! - b.distanceToUser!));
         }
 
         return filtered;
@@ -99,7 +105,7 @@ const MainScreen = () => {
         const paginated = filtered.slice(startPage, startPage + pageSize);
 
         setData(paginated);
-    }, [selectedCuisine.join(','), stallsCache, hideClosed, sortByParam, currPage, searchValue]);
+    }, [selectedCuisine.join(","), stallsCache, hideClosed, userLocation, currPage]);
 
     const navigateStall = (item: Stall) => {
         router.push({
@@ -116,10 +122,7 @@ const MainScreen = () => {
     const handleFilter = () => {
         const hideClosedParam = hideClosed ? '&hideClosed=true' : '';
         const sortByQueryParam = sortByParam !== 'None' ? `&sortBy=${encodeURIComponent(sortByParam)}` : '';
-        setCurrPage(1);
-        router.push(
-            `/filter?cuisine=${encodeURIComponent(selectedCuisine.join(','))}${hideClosedParam}${sortByQueryParam}`
-        );
+        router.push(`/filterNearby?cuisine=${encodeURIComponent(selectedCuisine.join(","))}${hideClosedParam}${sortByQueryParam}`);
     };
 
     const totalFiltered = getFilteredStalls().length;
@@ -137,16 +140,17 @@ const MainScreen = () => {
 
         const pageNumbers = [];
         for (let i = startPage; i <= endPage; i++) {
-            pageNumbers.push(i);
+            if (i >= 1 && i <= totalPages) {
+                pageNumbers.push(i);
+            }
         }
 
         return (
             <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
                 <TouchableOpacity
-                    onPress={() => setCurrPage((prev) => Math.max(prev - 1, 1))}
+                    onPress={() => setCurrPage(prev => Math.max(prev - 1, 1))}
                     disabled={currPage === 1}
-                    style={{ marginHorizontal: 5 }}
-                >
+                    style={{ marginHorizontal: 5 }}>
                     <Text style={{ color: currPage === 1 ? 'gray' : 'black' }}>Prev</Text>
                 </TouchableOpacity>
 
@@ -154,17 +158,15 @@ const MainScreen = () => {
                     <TouchableOpacity
                         key={`page-${page}`}
                         onPress={() => setCurrPage(page)}
-                        style={{ marginHorizontal: 5 }}
-                    >
+                        style={{ marginHorizontal: 5 }}>
                         <Text style={{ color: page === currPage ? 'blue' : 'black' }}>{page}</Text>
                     </TouchableOpacity>
                 ))}
 
                 <TouchableOpacity
-                    onPress={() => setCurrPage((prev) => Math.min(prev + 1, totalPages))}
+                    onPress={() => setCurrPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currPage === totalPages}
-                    style={{ marginHorizontal: 5 }}
-                >
+                    style={{ marginHorizontal: 5 }}>
                     <Text style={{ color: currPage === totalPages ? 'gray' : 'black' }}>Next</Text>
                 </TouchableOpacity>
             </View>
@@ -175,29 +177,24 @@ const MainScreen = () => {
         <SafeAreaProvider style={{ flex: 1 }}>
             <SafeAreaView style={SearchStyle.container}>
                 <View style={{ flex: 1 }}>
-                    <View style={SearchStyle.searchFilter}>
-                        <View style={{ flex: 1 }}>
-                            <SearchBar
-                                containerStyle={SearchStyle.searchBar}
-                                placeholder="Search for food..."
-                                value={searchValue}
-                                onChangeText={(text) => {
-                                    setSearchValue(text);
-                                    setCurrPage(1);
-                                }}
-                            />
-                        </View>
-                        <TouchableOpacity onPress={handleFilter} style={{ marginLeft: 10 }}>
-                            <Icon name="filter-list" type="material" size={30} color="gray" />
+                    <View style={[SearchStyle.searchFilter, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+                        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                            Explore Nearby
+                        </Text>
+                        <TouchableOpacity onPress={handleFilter}>
+                            <Icon name='filter-list' type='material' size={30} color='gray' />
                         </TouchableOpacity>
                     </View>
+
                     <FlatList
                         data={data}
                         renderItem={({ item }) => (
                             <StallItem item={item} onPress={() => navigateStall(item)} />
                         )}
                         keyExtractor={(item) => item.id}
-                        ListEmptyComponent={() => <Text>No match found</Text>}
+                        ListEmptyComponent={() => (
+                            <Text>No nearby stalls found.</Text>
+                        )}
                         ListFooterComponent={totalPages > 1 ? <PaginationControls /> : null}
                     />
                 </View>
@@ -207,4 +204,4 @@ const MainScreen = () => {
     );
 };
 
-export default MainScreen;
+export default NearbyScreen;
