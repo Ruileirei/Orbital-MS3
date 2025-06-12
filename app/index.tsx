@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { isFirebaseError } from "../firebase/FireBaseErrorChecking";
 import { authenticateUser } from "../firebase/userAuth";
+//import { signInWithEmailAndPassword } from "firebase/auth";
+
 
 const LoginScreen = () => {
     const router = useRouter();
