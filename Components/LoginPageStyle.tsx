@@ -1,15 +1,48 @@
 import { StyleSheet } from "react-native";
 const LoginStyles = StyleSheet.create({
-  container: {
+  
+  background: {
     flex: 1,
     backgroundColor: '#f0f2f5',
     justifyContent: 'center',
-    padding: 20,
+    paddingVertical: 20,
     alignItems: 'center',
   },
+
+  container1: {
+    flex: 2.5,
+    backgroundColor: '	#ffb933',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  shutter: {
+    flex: 2,
+    fontSize: 24,
+    backgroundColor: '	#ffb933',
+    justifyContent: 'center',
+  },
+  foodfindrLogo: {
+    flex: 1,
+    width: 200,
+    height: 300,
+    marginBottom: 15,
+    fontSize: 24,
+    textAlign: 'center',
+    fontWeight: '600',
+    color: '#333',
+  },
+
+  container2: {
+    flex: 3,
+    justifyContent: 'flex-start',
+    backgroundColor: 'transparent'
+  },
   loginBox: {
+    flex: 1.5,
+    justifyContent: 'flex-start',
     backgroundColor: '#fff',
-    padding: 30,
+    padding: 32,
     borderRadius: 12,
     width: '80%',
     elevation: 5, 
@@ -17,34 +50,37 @@ const LoginStyles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
+    
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: 'center',
-    fontWeight: '600',
-    color: '#333',
-  },
+  
   input: {
-    height: 48,
+    height: '30%',
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 8,
-    marginBottom: 12,
-    paddingHorizontal: 10,
+    marginTop: 5,
+    marginBottom: 8,
+    paddingHorizontal: 15,
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#007bff',
+    flexDirection: 'row-reverse',
+    backgroundColor: '#ffb933',
     paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 8,
+    borderRadius: 20,
+    marginTop: 5,
+    marginBottom: 10,
   },
   buttonText: {
     color: '#fff',
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '600',
+    paddingHorizontal: 15,
+  },
+  buttonContainer: {
+    flexDirection: 'row-reverse',
+    backgroundColor: 'transparent',
   },
   registerText: {
     marginTop: 16,
