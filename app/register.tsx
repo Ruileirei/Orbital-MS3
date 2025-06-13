@@ -1,9 +1,11 @@
 //import RegisterStyle from "@/Components/RegisterStyle";
 import LoginStyles from "@/Components/LoginPageStyle";
-import { registerUser } from "@/firebase/userRegister";
+//import { registerUser } from "@/firebase/userRegister";
 import { useRouter } from "expo-router";
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from "react";
 import { Alert, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { auth } from "../firebase/firebaseConfig";
 
 const Register = () => {
     const router = useRouter();
@@ -11,9 +13,55 @@ const Register = () => {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleRegister = async () => {
+        if (!username || !email || !password) {
+            Alert.alert("Please fill in all fields");
+            return;
+        }
+        setLoading(true);
+
+        // can add additional password checks here. Firebase has a strict password requirement of 6 characters
+
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            console.log('Registered:', userCredential.user);
+            setError('');
+            setSuccess(true);
+            Alert.alert("Registered successfully! Please Login.");
+
+            router.replace('/');
+
+        } catch (err: any) {
+            console.error(err); // log the full error to the console
+
+            let message = 'An unknown error occurred. Please try again';
+            
+            switch (err.code) {
+                case 'auth/email-already-in-use':
+                    message = 'This email is already registered.';
+                    break;
+                case 'auth/invalid-email':
+                    message = 'Please enter a valid email address.';
+                    break;
+                case 'auth/weak-password':
+                    message = 'Password should be at least 6 characters.';
+                    break;
+            }
+
+            setError(message); // Show error message to user on screen
+            setSuccess(false);
+            
+        } finally {
+            setLoading(false);
+        }
+    }
+    
+    /*
+    const first = async () => {
         if (!username || !email || !password) {
             Alert.alert("Please fill in all fields");
             return;
@@ -35,6 +83,9 @@ const Register = () => {
             setLoading(false);
         }
     };
+    */ 
+   
+
     return (
         <View style={LoginStyles.background}>
             <Text style={LoginStyles.shutter}> shutter </Text>
