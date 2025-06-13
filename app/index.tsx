@@ -57,7 +57,7 @@ const LoginScreen = () => {
 
             <TextInput
               style={LoginStyles.input}
-              placeholder="Email/Phone Number"
+              placeholder="Email"
               keyboardType="email-address"
               autoCapitalize="none"
               value={email}
@@ -89,10 +89,9 @@ const LoginScreen = () => {
             <TouchableOpacity onPress={checkRegister}>
               <Text style={LoginStyles.link}>Register</Text>
             </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    
-    );
+  );
 };
 
 export default LoginScreen;

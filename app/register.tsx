@@ -1,8 +1,9 @@
-import RegisterStyle from "@/Components/RegisterStyle";
+//import RegisterStyle from "@/Components/RegisterStyle";
+import LoginStyles from "@/Components/LoginPageStyle";
 import { registerUser } from "@/firebase/userRegister";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const Register = () => {
     const router = useRouter();
@@ -35,16 +36,52 @@ const Register = () => {
         }
     };
     return (
-        <View style={RegisterStyle.container}>
-            <View style={RegisterStyle.registerBox}>
-                <Text style={RegisterStyle.title}>Create Account</Text>
-                <TextInput placeholder="Username" style={RegisterStyle.input} value={username} onChangeText={setUsername} autoCapitalize="none"/>
-                <TextInput placeholder="Email" style={RegisterStyle.input} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none"/>
-                <TextInput placeholder="Password" style={RegisterStyle.input} value={password} onChangeText={setPassword} secureTextEntry/>
-                <TouchableOpacity onPress={handleRegister} style={RegisterStyle.button} disabled={loading}>
-                    <Text style={RegisterStyle.buttonText}>Register</Text>
-                </TouchableOpacity>
+        <View style={LoginStyles.background}>
+            <Text style={LoginStyles.shutter}> shutter </Text>
+            <Image source={require('../assets/images/FoodFindrLogo.jpg')} 
+            style={LoginStyles.foodfindrLogo}/>
+
+            <View style={LoginStyles.loginBox}>
+                <TextInput 
+                    style={LoginStyles.input}
+                    placeholder="Username"
+                    value={username} 
+                    onChangeText={setUsername} 
+                    autoCapitalize="none"
+                />
+
+                <TextInput 
+                    placeholder="Email" 
+                    style={LoginStyles.input} 
+                    value={email} 
+                    onChangeText={setEmail} 
+                    keyboardType="email-address" 
+                    autoCapitalize="none"
+                />
+
+                <TextInput 
+                    placeholder="Password" 
+                    style={LoginStyles.input} 
+                    value={password} 
+                    onChangeText={setPassword} 
+                    secureTextEntry
+                />
+
+                <View style={LoginStyles.buttonContainer}>
+
+                    <TouchableOpacity 
+                        style={LoginStyles.button} 
+                        onPress={handleRegister} 
+                        disabled={loading}
+                    >
+                        <Text style={LoginStyles.buttonText}>Register</Text>
+                    </TouchableOpacity>
+
+                </View>
+
+
             </View>
+
         </View>
     );
 };
