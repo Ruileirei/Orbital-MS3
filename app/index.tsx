@@ -91,8 +91,8 @@ const LoginScreen = () => {
             </TouchableOpacity>
         </View>
       </View>
-    </View>
-  );
+    
+    );
 };
 
 export default LoginScreen;
