@@ -1,10 +1,9 @@
 import LoginStyles from "@/Components/LoginPageStyle";
-import { authenticateUser } from "@/firebase/userAuth";
+import { auth } from "@/firebase/firebaseConfig";
 import { useRouter } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { Alert, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { isFirebaseError } from "../firebase/FireBaseErrorChecking";
-
 const LoginScreen = () => {
     const router = useRouter();
     const [email, setEmail] = useState("");
@@ -18,23 +17,29 @@ const LoginScreen = () => {
         } 
         setLoading(true);
         try {
-          const userCredential = await authenticateUser(email, password);
-          if (userCredential) {
-            router.replace('/main');
-          } else {
-            Alert.alert("Invalid email or password")
-          }
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          console.log("User logged in: ", user);
+          router.replace('/main');
         } catch (error: unknown) {
-          if (isFirebaseError(error)) {
-            if (error.code === "permission-denied") {
-              Alert.alert("Access denied", "You do not have permission.");
+          if (
+            typeof error === "object" && 
+            error !== null &&
+            'code' in error && 
+            'message' in error
+          ) {
+            const firebaseError = error as {code: string; message: string};
+            if (firebaseError.code === "auth/user-not-found" || firebaseError.code === "auth/wrong-password") {
+              Alert.alert("Invalid email or password");
+            } else if (firebaseError.code === "auth/too-many-requests") {
+              Alert.alert("Too many attempts. Please try again later.");
             } else {
-              Alert.alert("Error", error.message);
+              Alert.alert("Error", firebaseError.message);
             }
           } else if (error instanceof Error) {
             Alert.alert("Error", error.message);
           } else {
-            Alert.alert("An unknown error occurred");
+            Alert.alert("An unknwon error has occured");
           }
         } finally {
           setLoading(false);
