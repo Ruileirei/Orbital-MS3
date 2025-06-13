@@ -94,6 +94,53 @@ const LoginStyles = StyleSheet.create({
     fontSize: 14,
     color: '#007bff',
   },
+  loginButtonWrapper: {
+  alignSelf: 'flex-end',
+  marginTop: 16,
+  marginRight: 40, // adjust as needed
+  },
+  loginbutton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+
+  topContainer: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: '10%',
+  },
+
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 10,
+  },
+
+  tagline: {
+    fontSize: 16,
+    color: '#555',
+    fontStyle: 'italic',
+  },
+  bottomRegister: {
+  position: "absolute",
+  bottom: 20,
+  width: "100%",
+  flexDirection: "row",
+  justifyContent: "center",
+  alignItems: "center",
+},
 });
 
 export default LoginStyles;

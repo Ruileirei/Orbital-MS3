@@ -8,11 +8,11 @@ const StallStyle = StyleSheet.create ({
         padding: 20,
     },
     title: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: "bold",
     },
     subtitle: {
-        fontSize: 18,
+        fontSize: 16,
         marginTop: 10,
     },
     sectionTitle: {

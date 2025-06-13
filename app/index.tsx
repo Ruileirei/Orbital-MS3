@@ -89,8 +89,9 @@ const LoginScreen = () => {
             <TouchableOpacity onPress={checkRegister}>
               <Text style={LoginStyles.link}>Register</Text>
             </TouchableOpacity>
-          </View>
         </View>
+      </View>
+    </View>
   );
 };
 

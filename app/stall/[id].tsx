@@ -1,59 +1,61 @@
 import StallStyle from "@/Components/StallPageStyle";
 import StarRating from "@/Components/starRating";
 import { db } from "@/firebase/firebaseConfig";
+import { formatTime } from "@/utils/formatTime";
+import { getOpenStatus, OpenStatus } from '@/utils/isOpenStatus';
 import { Icon } from "@rneui/themed";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, Image, Modal, Text, TouchableOpacity, View } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import { ActivityIndicator, Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
 import Carousel from 'react-native-reanimated-carousel';
+
 const {width: screenWidth} = Dimensions.get('window');
 
 const StallInfo = () => {
+    const DAY_LABEL_WIDTH = "22%";
+    const dayOrder = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const currentDayIndex = new Date().getDay();
+    const currentDay = dayOrder[currentDayIndex];
     const {id, title, cuisine, rating} = useLocalSearchParams();
     const navigation= useNavigation();
-    const [isImageVisible, setImageVisible] = useState(false);
-    const [selectImage, setSelectImage] = useState(0);
-
+    type OpeningHours = {
+        [key: string]: string | string[];
+    };
     const [stallData, setStallData] = useState<null | {
         name: string;
         cuisine: string;
         rating: number;
         location?: string;
+        openingHours?: OpeningHours;
         menu?: string[];
     }>(null);
     const [loading, setLoading] = useState(true);
     const [isSaved, setIsSaved] = useState(false);
-    
-    const scale = useSharedValue(1);
-    const focalX = useSharedValue(0);
-    const focalY = useSharedValue(0);
+    const [isOpenHrDropDown, setOpenHrDropDown] = useState(false);
 
-    const pinchHandler = Gesture.Pinch()
-        .onUpdate((e) => {
-            scale.value = e.scale;
-            focalX.value = e.focalX;
-            focalY.value = e.focalY;
-        })
-        .onEnd(() => {
-            scale.value = withTiming(1);
-        });
-
-    const animatedImageStyle = useAnimatedStyle(() => ({
-        transform: [
-            { translateX: focalX.value },
-            { translateY: focalY.value },
-            { translateX: -screenWidth / 2 },
-            { translateY: -screenWidth / 2 },
-            { scale: scale.value },
-            { translateX: -focalX.value },
-            { translateY: -focalY.value },
-            { translateX: screenWidth / 2 },
-            { translateY: screenWidth / 2 },
-        ],
-    }));
+    const openStatus: OpenStatus = getOpenStatus(stallData?.openingHours ?? {});
+    let statusText = '';
+    let statusColor = '';
+    switch (openStatus) {
+        case 'OPEN':
+            statusText = 'Open Now';
+            statusColor = 'green';
+            break;
+        case 'CLOSING_SOON':
+            statusText = 'Closing Soon';
+            statusColor = 'orange';
+            break;
+        case 'OPENING_SOON':
+            statusText = 'Opening Soon';
+            statusColor = 'orange';
+            break;
+        case 'CLOSED':
+        default:
+            statusText = 'Closed';
+            statusColor = 'red';
+            break;
+    }
 
     useLayoutEffect(() => {
         if (title) {
@@ -96,22 +98,14 @@ const StallInfo = () => {
                : ["https://png.pngtree.com/png-vector/20221109/ourmid/pngtree-no-image-available-icon-flatvector-illustration-graphic-available-coming-vector-png-image_40958834.jpg"];
     }, [stallData]);
 
-    const openImageViewer = (index: number) => {
-        setSelectImage(index);
-        setImageVisible(true);
-    };
-    const closeImageViewer = () => {
-        setImageVisible(false);
-    }
-
     const renderCarouselItem = ({item, index}: {item: string, index: number}) => (
-        <TouchableOpacity onPress={() => openImageViewer(index)}>
+        <View>
             <Image
                 source={{uri: item}}
                 style={StallStyle.carouselImage}
                 resizeMode="contain"
             />
-        </TouchableOpacity>
+        </View>
     );
     
     if (loading) {
@@ -145,7 +139,94 @@ const StallInfo = () => {
             <View style={{flexDirection:'row', alignItems:'center', marginVertical: 4}}>
                 <StarRating rating={stallData.rating ?? (rating ? Number(rating) : 0)} size={20}/>
             </View>
-            <Text style={StallStyle.subtitle}> Location: {stallData.location ?? "Location not available"}</Text> 
+            <View style={{flexDirection: 'row', alignItems:'center', marginBottom: 8}}>
+                <Icon
+                    name="location-on"
+                    type="material"
+                    size={20}
+                    color='gray'
+                    style={{marginRight: 8}}
+                 />
+                <Text style={StallStyle.subtitle}>
+                    <Text style={{fontWeight: 'bold'}}>Location: </Text>
+                    {stallData.location ?? "Location not available"}
+                </Text> 
+            </View>
+            
+            <TouchableOpacity
+                onPress={() => setOpenHrDropDown(prev => !prev)}
+                style={{flexDirection: 'row', alignItems:'center', marginVertical:8}}
+            >
+                <Icon
+                    name="access-time"
+                    type="material"
+                    size={20}
+                    color={statusColor}
+                    style={{marginRight: 8}}
+                />
+                <Text style={{fontSize: 16, fontWeight:'600', color: statusColor}}>
+                    {statusText}
+                </Text>
+            </TouchableOpacity>
+
+            {isOpenHrDropDown && stallData.openingHours && (
+                <View style={{paddingLeft: 28, marginBottom: 8}}>
+                    {dayOrder.map((day) => {
+                        const value = stallData.openingHours?.[day];
+                        return (
+                            <View key={day} style={{marginBottom: 4}}>
+                                {typeof value === 'string' ? (
+                                    // Closed day
+                                    <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
+                                        <Text
+                                            style={{
+                                                fontSize: 14,
+                                                fontWeight: day === currentDay ? 'bold' : 'normal',
+                                                width: DAY_LABEL_WIDTH,
+                                            }}
+                                        >
+                        {day.charAt(0).toUpperCase() + day.slice(1)}:
+                                        </Text>
+                                        <Text style={{fontSize: 14}}>
+                                            {value}
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    <>
+                                        <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
+                                            <Text
+                                                style={{
+                                                    fontSize: 14,
+                                                    fontWeight: day === currentDay ? 'bold' : 'normal',
+                                                    width: DAY_LABEL_WIDTH,
+                                                }}
+                                            >
+                                                {day.charAt(0).toUpperCase() + day.slice(1)}:
+                                            </Text>
+                                            <Text style={{fontSize: 14}}>
+                                                {value && value.length > 0 ? formatTime(value[0]) : ""}
+                                            </Text>
+                                        </View>
+                                        {value?.slice(1).map((slot, index) => (
+                                            <View key={index} style={{flexDirection: 'row'}}>
+                                                <View style={{width: DAY_LABEL_WIDTH}} />
+                                                <Text
+                                                    style={{
+                                                        fontSize: 14,
+                                                    }}
+                                                >
+                                                    {formatTime(slot)}
+                                                </Text>
+                                            </View>
+                                        ))}
+                                    </>
+                                )}
+                            </View>
+                        );
+                    })}
+                </View>
+            )}
+
             <Text style={StallStyle.sectionTitle}>Menu</Text>
             <Carousel
                 width={screenWidth}
@@ -161,34 +242,7 @@ const StallInfo = () => {
                 autoPlay={false}
                 snapEnabled={images.length > 1}
             />
-            <Modal visible={isImageVisible} transparent={true} onRequestClose={closeImageViewer}>
-                <View style={{flex: 1, backgroundColor: "black"}}>
-                    <TouchableOpacity
-                        style={{position:"absolute", top: 40, right: 20, zIndex: 1}}
-                        onPress={closeImageViewer}
-                    >
-                        <Text style={{color:'white', fontSize: 18}}>X</Text>
-                    </TouchableOpacity>
-                    <GestureDetector gesture={pinchHandler}>
-                        <Animated.View style={{flex: 1, justifyContent: "center", alignItems:"center"}}>
-                            <Animated.Image
-                                source = {{uri:images[selectImage]}}
-                                style={[
-                                    {
-                                        width:"100%",
-                                        height:"100%",
-                                        resizeMode:"contain",
-                                    },
-                                    animatedImageStyle
-                                ]}
-                            />
-                        </Animated.View>
-                    </GestureDetector>
-                </View>
-            </Modal>
-
         </View>
-        
     );
 };
 

@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const filterScreen = () => {
+const filterNearby = () => {
     const router = useRouter();
     const params = useLocalSearchParams();
 
@@ -20,19 +20,17 @@ const filterScreen = () => {
     const [selectedCuisine, setSelectedCuisines] = useState<string[]>(
         cuisineParams ? cuisineParams.split(',') : []
     );
-    
+
     const [hideClosed, setHideClosed] = useState(hideClosedParam);
-    const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
-    const dietaryOptions = ['Halal', 'Vegetarian'];
-    
+
     const initialSelectedMisc = hideClosedParam ? ['Hide Closed Stalls'] : [];
     const [selectedMisc, setSelectedMisc] = useState<string[]>(initialSelectedMisc);
     const miscOptions = ['Hide Closed Stalls'];
-    
+
     const sortByOptions = ['None', 'High to Low', 'Low to High'];
     const [sortByRating, setSortByRating] = useState<string>(sortByParam);
     const selectedSortBy = [sortByRating];
-    
+
     const toggleSortByRating = (option: string) => {
         setSortByRating(option);
     };
@@ -47,7 +45,7 @@ const filterScreen = () => {
                     cuisineSet.add(data.cuisine);
                 }
             });
-            setCuisineOptions(Array.from(cuisineSet). sort());
+            setCuisineOptions(Array.from(cuisineSet).sort());
         }
         fetchCuisines();
     }, []);
@@ -60,18 +58,10 @@ const filterScreen = () => {
         }
     };
 
-    const toggleDietary = (option: string) => {
-        if (selectedDietary.includes(option)) {
-            setSelectedDietary(selectedDietary.filter(o => o !== option));
-        } else {
-            setSelectedDietary([...selectedDietary, option]);
-        }
-    };
-
     const toggleMisc = (option: string) => {
         const newSelectedMisc = selectedMisc.includes(option)
-        ? selectedMisc.filter(o => o !== option)
-        : [...selectedMisc, option];
+            ? selectedMisc.filter(o => o !== option)
+            : [...selectedMisc, option];
         setSelectedMisc(newSelectedMisc);
         if (option === 'Hide Closed Stalls') {
             setHideClosed(!selectedMisc.includes(option));
@@ -82,23 +72,23 @@ const filterScreen = () => {
         const query = selectedCuisine.join(",");
         const hideClosedParam = hideClosed ? '&hideClosed=true' : '';
         const sortByParam = sortByRating !== 'None' ? `&sortBy=${encodeURIComponent(sortByRating)}` : '';
-        router.push(`/main?cuisine=${encodeURIComponent(query)}${hideClosedParam}${sortByParam}`);
+        router.push(`/nearby?cuisine=${encodeURIComponent(query)}${hideClosedParam}${sortByParam}`);
     };
 
     const handleClear = () => {
         setSelectedCuisines([]);
         setHideClosed(false);
-        setSelectedDietary([]);
+        setSelectedMisc([]);
         setSortByRating('None');
-    }
+    };
 
     return (
         <SafeAreaView style={filterStyle.container}>
-            <Text style={[filterStyle.text, {textAlign: 'center', alignSelf:'center'}]}>
-                Filter
+            <Text style={[filterStyle.text, { textAlign: 'center', alignSelf: 'center' }]}>
+                Filter Nearby
             </Text>
-            
-            <ScrollView style={{marginBottom: 20}}>
+
+            <ScrollView style={{ marginBottom: 20 }}>
                 <FilterDropdown
                     title="Sort by Rating"
                     options={sortByOptions}
@@ -113,40 +103,32 @@ const filterScreen = () => {
                     onToggleOption={toggleCuisine}
                 />
                 <FilterDropdown
-                    title="Dietary Requirements"
-                    options={dietaryOptions}
-                    selectedOptions={selectedDietary}
-                    onToggleOption={toggleDietary}
-                />
-
-                <FilterDropdown
                     title="Miscellaneous"
                     options={miscOptions}
                     selectedOptions={selectedMisc}
                     onToggleOption={toggleMisc}
-                /> 
+                />
             </ScrollView>
+
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <Button 
-                    title = "Clear"
+                <Button
+                    title="Clear"
                     onPress={handleClear}
                     type='outline'
-                    buttonStyle={{backgroundColor: 'white', borderRadius: 10, borderColor: 'transparent'}}
-                    titleStyle={{color: 'black'}}
-                    containerStyle={{flex: 1, marginRight: 10}}
+                    buttonStyle={{ backgroundColor: 'white', borderRadius: 10, borderColor: 'transparent' }}
+                    titleStyle={{ color: 'black' }}
+                    containerStyle={{ flex: 1, marginRight: 10 }}
                 />
                 <Button
-                    title={`Apply (${selectedCuisine.length + selectedDietary.length + selectedMisc.length})`}
+                    title={`Apply (${selectedCuisine.length + selectedMisc.length})`}
                     onPress={applyFilter}
-                    buttonStyle={{backgroundColor:"black", borderRadius: 10}}
-                    titleStyle={{color: 'white'}}
-                    containerStyle={{flex: 1}}
+                    buttonStyle={{ backgroundColor: "black", borderRadius: 10 }}
+                    titleStyle={{ color: 'white' }}
+                    containerStyle={{ flex: 1 }}
                 />
             </View>
         </SafeAreaView>
     );
-
 };
 
-export default filterScreen;
- 
+export default filterNearby;

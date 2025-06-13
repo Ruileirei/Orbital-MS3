@@ -12,7 +12,10 @@ export default function RootLayout() {
           <Stack.Screen name="stall/[id]"/>
           <Stack.Screen name="filter" options={{ title: "Filter", headerShown: false }} />
           <Stack.Screen name="user" options={{ title: "User Profile", headerShown: false }} />
-          <Stack.Screen name="map" options={{ title: "Map", headerShown: false }} />
+          <Stack.Screen name="Map" options={{ title: "Map", headerShown: true }} />
+          <Stack.Screen name="register" options={{headerShown: false}}/>
+          <Stack.Screen name="nearby" options={{headerShown: false}}/>
+          <Stack.Screen name="filterNearby" options={{headerShown: false}}/>
         </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>
