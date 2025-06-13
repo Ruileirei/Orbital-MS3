@@ -57,7 +57,7 @@ const LoginScreen = () => {
 
             <TextInput
               style={LoginStyles.input}
-              placeholder="Email/Phone Number"
+              placeholder="Email"
               keyboardType="email-address"
               autoCapitalize="none"
               value={email}
