@@ -82,7 +82,7 @@ const filterScreen = () => {
         const query = selectedCuisine.join(",");
         const hideClosedParam = hideClosed ? '&hideClosed=true' : '';
         const sortByParam = sortByRating !== 'None' ? `&sortBy=${encodeURIComponent(sortByRating)}` : '';
-        router.push(`/main?cuisine=${encodeURIComponent(query)}${hideClosedParam}${sortByParam}`);
+        router.push(`/search?cuisine=${encodeURIComponent(query)}${hideClosedParam}${sortByParam}`);
     };
 
     const handleClear = () => {

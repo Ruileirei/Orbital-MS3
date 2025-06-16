@@ -18,7 +18,7 @@ const NavBarStyle = StyleSheet.create({
         color: 'gray',
     },
     activeText: {
-        color: "#007bff",
+        color: "#ffb933",
         fontWeight: "600",
     },
 });

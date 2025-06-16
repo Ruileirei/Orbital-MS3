@@ -66,7 +66,7 @@ const NearbyScreen = () => {
             if (!userLocation) return;
             try {
                 const nearbyStalls = await geoQuery(userLocation.latitude, userLocation.longitude, 3000);
-                setStallsCache(nearbyStalls); // this is your master data
+                setStallsCache(nearbyStalls);
                 setCurrPage(1);
             } catch (error) {
                 console.error("Error fetching nearby stalls");
@@ -175,30 +175,29 @@ const NearbyScreen = () => {
 
     return (
         <SafeAreaProvider style={{ flex: 1 }}>
-            <SafeAreaView style={SearchStyle.container}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
                 <View style={{ flex: 1 }}>
-                    <View style={[SearchStyle.searchFilter, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-                        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                            Explore Nearby
-                        </Text>
+                    <View style={[SearchStyle.searchContainer, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
+                        <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold' }}>Explore Nearby</Text>
                         <TouchableOpacity onPress={handleFilter}>
-                            <Icon name='filter-list' type='material' size={30} color='gray' />
+                        <Icon name='filter-list' type='material' size={28} color='white' />
                         </TouchableOpacity>
                     </View>
-
                     <FlatList
                         data={data}
-                        renderItem={({ item }) => (
-                            <StallItem item={item} onPress={() => navigateStall(item)} />
-                        )}
                         keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                        <StallItem item={item} onPress={() => navigateStall(item)} />
+                        )}
+                        contentContainerStyle={{ paddingBottom: 10, paddingHorizontal: 10 }}
                         ListEmptyComponent={() => (
-                            <Text>No nearby stalls found.</Text>
+                        <Text style={{ textAlign: 'center', marginTop: 20, color: 'gray' }}>No nearby stalls found.</Text>
                         )}
                         ListFooterComponent={totalPages > 1 ? <PaginationControls /> : null}
+                        bounces={false}
                     />
+                    <BotNavBar />
                 </View>
-                <BotNavBar />
             </SafeAreaView>
         </SafeAreaProvider>
     );

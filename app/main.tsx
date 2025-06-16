@@ -1,210 +1,76 @@
+import mainStyle from '@/Components/mainStyle';
 import BotNavBar from '@/Components/navigationBar';
-import StallItem from '@/Components/StallItem';
-import { db } from '@/firebase/firebaseConfig';
-import { getOpenStatus } from '@/utils/isOpenStatus';
-import { Icon, SearchBar } from '@rneui/themed';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { collection, getDocs } from 'firebase/firestore';
+import { auth, db } from '@/firebase/firebaseConfig';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { doc, getDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import SearchStyle from '../Components/SearchStyle';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-interface Stall {
-    id: string;
-    title: string;
-    cuisine: string;
-    rating: number;
-    openingHours: {
-        [key: string]: string[];
-    };
-    latitude: number;
-    longitude: number;
-}
+const categories = [
+    {label: "halal", icon: "food-halal"},
+];
 
-const MainScreen = () => {
+const MainPage = () => {
     const router = useRouter();
-    const [data, setData] = useState<Stall[]>([]);
-    const [stallsCache, setStallsCache] = useState<Stall[]>([]);
-    const [currPage, setCurrPage] = useState(1);
-    const [searchValue, setSearchValue] = useState('');
-
-    const pageSize = 10;
-    const params = useLocalSearchParams();
-    const cuisineParams = typeof params.cuisine === 'string' ? params.cuisine : '';
-    const selectedCuisine = cuisineParams ? cuisineParams.split(',') : [];
-    const hideClosed = params.hideClosed === 'true';
-    const sortByParam = typeof params.sortBy === 'string' ? params.sortBy : 'None';
+    const [username, setUsername] = useState('User');
 
     useEffect(() => {
-        async function fetchStalls() {
-            try {
-                const queryRes = await getDocs(collection(db, 'stalls'));
-                const stalls: Stall[] = [];
-                queryRes.forEach((doc) => {
-                    const stallData = doc.data();
-                    stalls.push({
-                        id: doc.id,
-                        title: stallData.name ?? '',
-                        cuisine: stallData.cuisine ?? '',
-                        rating: stallData.rating ?? 0,
-                        openingHours: stallData.openingHours ?? {},
-                        latitude: stallData.latitude ?? 0,
-                        longitude: stallData.longitude ?? 0,
-                    });
-                });
-                setStallsCache(stalls);
-                setCurrPage(1);
-            } catch (error) {
-                console.error('Error fetching stalls:', error);
+        const fetchUser = async () => {
+            const user = auth.currentUser;
+            if (user) {
+                const docRef = doc(db, 'users', user.uid);
+                const snap = await getDoc(docRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    setUsername(data.username || 'User');
+                }
             }
-        }
-        fetchStalls();
+        };
+        fetchUser()
     }, []);
 
-    const getFilteredStalls = () => {
-        let filtered = stallsCache;
-
-        if (selectedCuisine.length > 0) {
-            filtered = filtered.filter((item) =>
-                selectedCuisine.includes(item.cuisine)
-            );
-        }
-
-        if (hideClosed) {
-            filtered = filtered.filter(
-                (item) => getOpenStatus(item.openingHours ?? {}) === 'OPEN'
-            );
-        }
-
-        if (sortByParam === 'High to Low') {
-            filtered.sort((a, b) => b.rating - a.rating);
-        } else if (sortByParam === 'Low to High') {
-            filtered.sort((a, b) => a.rating - b.rating);
-        }
-
-        if (searchValue.trim() !== '') {
-            const textData = searchValue.trim().toUpperCase();
-            filtered = filtered.filter(item =>
-                item.title.toUpperCase().includes(textData)
-            );
-        }
-
-        return filtered;
-    };
-
-    useEffect(() => {
-        const filtered = getFilteredStalls();
-        const startPage = (currPage - 1) * pageSize;
-        const paginated = filtered.slice(startPage, startPage + pageSize);
-
-        setData(paginated);
-    }, [selectedCuisine.join(','), stallsCache, hideClosed, sortByParam, currPage, searchValue]);
-
-    const navigateStall = (item: Stall) => {
-        router.push({
-            pathname: '/stall/[id]',
-            params: {
-                id: item.id,
-                title: item.title,
-                cuisine: item.cuisine,
-                rating: item.rating.toString(),
-            },
-        });
-    };
-
-    const handleFilter = () => {
-        const hideClosedParam = hideClosed ? '&hideClosed=true' : '';
-        const sortByQueryParam = sortByParam !== 'None' ? `&sortBy=${encodeURIComponent(sortByParam)}` : '';
-        setCurrPage(1);
-        router.push(
-            `/filter?cuisine=${encodeURIComponent(selectedCuisine.join(','))}${hideClosedParam}${sortByQueryParam}`
-        );
-    };
-
-    const totalFiltered = getFilteredStalls().length;
-    const totalPages = Math.ceil(totalFiltered / pageSize);
-
-    const PaginationControls = () => {
-        const maxPageButtons = 5;
-        let startPage = Math.max(1, currPage - Math.floor(maxPageButtons / 2));
-        let endPage = startPage + maxPageButtons - 1;
-
-        if (endPage > totalPages) {
-            endPage = totalPages;
-            startPage = Math.max(1, endPage - maxPageButtons + 1);
-        }
-
-        const pageNumbers = [];
-        for (let i = startPage; i <= endPage; i++) {
-            pageNumbers.push(i);
-        }
-
-        return (
-            <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: 10 }}>
-                <TouchableOpacity
-                    onPress={() => setCurrPage((prev) => Math.max(prev - 1, 1))}
-                    disabled={currPage === 1}
-                    style={{ marginHorizontal: 5 }}
-                >
-                    <Text style={{ color: currPage === 1 ? 'gray' : 'black' }}>Prev</Text>
-                </TouchableOpacity>
-
-                {pageNumbers.map((page) => (
-                    <TouchableOpacity
-                        key={`page-${page}`}
-                        onPress={() => setCurrPage(page)}
-                        style={{ marginHorizontal: 5 }}
-                    >
-                        <Text style={{ color: page === currPage ? 'blue' : 'black' }}>{page}</Text>
-                    </TouchableOpacity>
-                ))}
-
-                <TouchableOpacity
-                    onPress={() => setCurrPage((prev) => Math.min(prev + 1, totalPages))}
-                    disabled={currPage === totalPages}
-                    style={{ marginHorizontal: 5 }}
-                >
-                    <Text style={{ color: currPage === totalPages ? 'gray' : 'black' }}>Next</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    };
-
     return (
-        <SafeAreaProvider style={{ flex: 1 }}>
-            <SafeAreaView style={SearchStyle.container}>
-                <View style={{ flex: 1 }}>
-                    <View style={SearchStyle.searchFilter}>
-                        <View style={{ flex: 1 }}>
-                            <SearchBar
-                                containerStyle={SearchStyle.searchBar}
-                                placeholder="Search for food..."
-                                value={searchValue}
-                                onChangeText={(text) => {
-                                    setSearchValue(text);
-                                    setCurrPage(1);
-                                }}
-                            />
-                        </View>
-                        <TouchableOpacity onPress={handleFilter} style={{ marginLeft: 10 }}>
-                            <Icon name="filter-list" type="material" size={30} color="gray" />
+        <SafeAreaView style={{flex: 1, backgroundColor:'#fff'}}>
+            <View style={{flex: 1}}>
+                <ScrollView contentContainerStyle={{paddingBottom: 20}}>
+                    <View style={mainStyle.topContainer}>
+                        <Text style={mainStyle.WelcomeText}>Hi {username}</Text>
+
+                        <TouchableOpacity
+                            onPress={() => router.push('./search')}
+                            style={mainStyle.SearchBar}
+                        >
+                            <Ionicons name="search" size={20} color='gray'/>
+                            <Text style={{marginLeft: 8, color: 'gray'}}>Search for hawker food...</Text>
                         </TouchableOpacity>
                     </View>
-                    <FlatList
-                        data={data}
-                        renderItem={({ item }) => (
-                            <StallItem item={item} onPress={() => navigateStall(item)} />
-                        )}
-                        keyExtractor={(item) => item.id}
-                        ListEmptyComponent={() => <Text>No match found</Text>}
-                        ListFooterComponent={totalPages > 1 ? <PaginationControls /> : null}
-                    />
-                </View>
-                <BotNavBar />
-            </SafeAreaView>
-        </SafeAreaProvider>
+                    <View style={{padding: 20}}>
+                        <Text style={{fontSize: 16, fontWeight:'600', marginBottom: 10}}>Browse by Category</Text>
+                        <View style={mainStyle.categoryContainer}>
+                            {categories.map((cat, idx) => (
+                                <TouchableOpacity
+                                    key={idx}
+                                    onPress={() => router.push({
+                                        pathname: "./group/[id]",
+                                        params: {id: cat.label.toLowerCase(). replace(/\s+/g, "_")}
+                                    })}
+                                    style={mainStyle.categoryButton}
+                                >
+                                    <MaterialCommunityIcons name={cat.icon as any} size={24} color={"#fff"}/>
+                                    <Text style={{marginTop: 6, fontSize: 13, fontWeight: '500', color:'#fff'}}>
+                                        {cat.label.charAt(0).toUpperCase() + cat.label.slice(1)}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+                </ScrollView>
+                <BotNavBar/>
+            </View>
+        </SafeAreaView>
     );
 };
 
-export default MainScreen;
+export default MainPage;

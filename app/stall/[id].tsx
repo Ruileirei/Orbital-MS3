@@ -1,14 +1,15 @@
 import StallStyle from "@/Components/StallPageStyle";
 import StarRating from "@/Components/starRating";
-import { db } from "@/firebase/firebaseConfig";
+import { auth, db } from "@/firebase/firebaseConfig";
 import { formatTime } from "@/utils/formatTime";
 import { getOpenStatus, OpenStatus } from '@/utils/isOpenStatus';
 import { Icon } from "@rneui/themed";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { doc, getDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { ActivityIndicator, Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
 import Carousel from 'react-native-reanimated-carousel';
+import Toast from "react-native-toast-message";
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -57,6 +58,40 @@ const StallInfo = () => {
             break;
     }
 
+    const handleFavourite = async () => {
+        if (!auth.currentUser) {
+            console.log("User is not logged in");
+            return;
+        }
+        try {
+            const userRef = doc(db, 'users', auth.currentUser.uid);
+
+            if (isSaved) {
+                await updateDoc(userRef, {
+                    favourites: arrayRemove(id),
+                });
+                setIsSaved(false);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Removed from favourites',
+                    text2: `${stallData?.name ?? title} was removed.`,
+                });
+            } else {
+                await updateDoc(userRef, {
+                    favourites: arrayUnion(id),
+                });
+                setIsSaved(true);
+                Toast.show({
+                    type: 'success',
+                    text1: 'Added from favourites',
+                    text2: `${stallData?.name ?? title} was added!`,
+                });
+            }
+        } catch (error) {
+            console.error("Error updating favourites: ", error);
+        }
+    };
+
     useLayoutEffect(() => {
         if (title) {
             navigation.setOptions({title: title.toString()});
@@ -87,6 +122,25 @@ const StallInfo = () => {
             }
         }
         fetchStall();
+    }, [id]);
+
+    useEffect(() => {
+        async function checkIfFavourite() {
+            if (!auth.currentUser || !id) return;
+
+            try {
+                const userRef = doc(db, 'users', auth.currentUser.uid);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    const favourites = userData.favourites || [];
+                    setIsSaved(favourites.includes(id));
+                }
+            } catch (error) {
+                console.error("Error checking favourites:", error);
+            }
+        }
+        checkIfFavourite();
     }, [id]);
 
     const images = React.useMemo(() => {
@@ -126,7 +180,7 @@ const StallInfo = () => {
 
     return (
         <View style={StallStyle.container}>
-            <TouchableOpacity onPress={() => setIsSaved(true)} style={StallStyle.saveIcon}>
+            <TouchableOpacity onPress={handleFavourite} style={StallStyle.saveIcon}>
                 <Icon 
                     name={isSaved ? 'heart' : 'heart-o'}
                     type='font-awesome'
@@ -176,7 +230,6 @@ const StallInfo = () => {
                         return (
                             <View key={day} style={{marginBottom: 4}}>
                                 {typeof value === 'string' ? (
-                                    // Closed day
                                     <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
                                         <Text
                                             style={{

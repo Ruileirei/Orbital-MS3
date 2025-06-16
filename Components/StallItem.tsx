@@ -2,7 +2,7 @@ import StarRating from '@/Components/starRating';
 import { getOpenStatus } from '@/utils/isOpenStatus';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 interface Stall {
     id: string;
@@ -13,6 +13,7 @@ interface Stall {
         [key: string]: string[];
     };
     distanceToUser?: number;
+    menu?: string[];
 }
 
 interface StallItemProps {
@@ -61,31 +62,36 @@ const StallItem: React.FC<StallItemProps> = ({ item }) => {
 
     return (
         <TouchableOpacity onPress={navigateStall} style={{
+            flexDirection: 'row',
+            padding: 12,
+            marginVertical: 6,
+            marginHorizontal: 10,
             backgroundColor: '#fff',
-            padding: 16,
-            marginVertical: 8,
-            marginHorizontal: 12,
-            borderRadius: 12,
+            borderRadius: 10,
             borderWidth: 1,
             borderColor: '#ddd',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
+            elevation: 1,
+            alignItems: 'center',
         }}>
-            <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 4 }}>
-                {item.title}
-            </Text>
-            <View style={{ flexDirection: 'column' }}>
+            <Image
+                source={{ uri: item.menu?.[0] || "https://png.pngtree.com/png-vector/20221109/ourmid/pngtree-no-image-available-icon-flatvector-illustration-graphic-available-coming-vector-png-image_40958834.jpg" }}
+                style={{ width: 60, height: 60, borderRadius: 8, marginRight: 12 }}
+            />
+            <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: '600', marginBottom: 4 }}>
+                    {item.title}
+                </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <Text>{item.cuisine} </Text>
+                    <Text style={{ fontSize: 13, color: 'gray', marginRight: 6 }}>
+                        {item.cuisine}
+                    </Text>
                     <StarRating rating={item.rating} size={14} />
-                    <Text style={{ marginLeft: 10, color: statusColor }}>
+                    <Text style={{ marginLeft: 8, fontSize: 13, color: statusColor }}>
                         {statusText}
                     </Text>
                 </View>
                 {item.distanceToUser !== undefined && (
-                    <Text style={{ fontSize: 12, color: 'gray', alignSelf: 'flex-start' }}>
+                    <Text style={{ fontSize: 12, color: 'gray', marginTop: 2 }}>
                         {item.distanceToUser.toFixed(1)} km away
                     </Text>
                 )}

@@ -18,7 +18,7 @@ const BotNavBar = () => {
                 <MaterialIcons
                     name="home"
                     size={28}
-                    color={isActive('/main') ? '#007bff' : 'gray'}
+                    color={isActive('/main') ? '#ffb933' : 'gray'}
                 />
                 <Text 
                     style={[NavBarStyle.navText, isActive('/main') && NavBarStyle.activeText]}>Home</Text>
@@ -30,7 +30,7 @@ const BotNavBar = () => {
                 <MaterialIcons
                     name="location-on"
                     size={28}
-                    color={isActive('/nearby') ? '#007bff' : 'gray'}
+                    color={isActive('/nearby') ? '#ffb933' : 'gray'}
                 />
                 <Text style={[NavBarStyle.navText, isActive('/nearby') && NavBarStyle.activeText]}>
                     Nearby
@@ -55,7 +55,7 @@ const BotNavBar = () => {
                 <MaterialIcons
                     name="person"
                     size={28}
-                    color={isActive('/user') ? '#007bff' : 'gray'}
+                    color={isActive('/user') ? '#ffb933' : 'gray'}
                 />
                 <Text style={[NavBarStyle.navText, isActive('/user') && NavBarStyle.activeText]}>User</Text>
             </TouchableOpacity>

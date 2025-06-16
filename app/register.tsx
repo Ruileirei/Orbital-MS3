@@ -3,9 +3,10 @@ import LoginStyles from "@/Components/LoginPageStyle";
 //import { registerUser } from "@/firebase/userRegister";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { Alert, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { auth } from "../firebase/firebaseConfig";
+import { auth, db } from "../firebase/firebaseConfig";
 
 const Register = () => {
     const router = useRouter();
@@ -29,6 +30,14 @@ const Register = () => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             console.log('Registered:', userCredential.user);
+            
+            await setDoc(doc(db, 'users', userCredential.user.uid), {
+                username: username,
+                email: email,
+                favourites: [],
+                createdAt: new Date()
+            });
+
             setError('');
             setSuccess(true);
             Alert.alert("Registered successfully! Please Login.");
