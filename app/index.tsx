@@ -5,6 +5,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 const LoginScreen = () => {
     const router = useRouter();
     const [email, setEmail] = useState("");
@@ -79,6 +80,9 @@ const LoginScreen = () => {
                 value={password}
                 onChangeText={setPassword}
               />
+              <TouchableOpacity onPress={() => router.push('/forgetPW')}>
+                <Text style={{color: '#007aff', marginLeft: 4, marginTop: -5, marginBottom: -5}}>Forgot Password?</Text>
+              </TouchableOpacity>
 
               <View style={LoginStyles.buttonContainer}>
                 <TouchableOpacity style={LoginStyles.button} onPress={checkLogin} disabled={loading}>

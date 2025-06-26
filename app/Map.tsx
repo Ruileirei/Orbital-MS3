@@ -9,6 +9,7 @@ import { collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Callout, Marker, Region } from 'react-native-maps';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Stall = {
     id: string;
@@ -141,88 +142,90 @@ const MapScreen: React.FC = () => {
     }
 
     return (
-        <View style={{flex: 1}}>
-            <MapView
-                ref={mapRef}
-                style={MapStyle.map} 
-                initialRegion={SINGAPORE_MAP}
-                showsUserLocation={true}
-                showsMyLocationButton={false}
-            >
-                {filterStalls.map(stall => (
-                    <Marker
-                        key={stall.id}
-                        coordinate={{latitude: stall.latitude, longitude:stall.longitude}}
-                        onPress={() => setSelectedStall(stall)}
-                        >
-                        <Callout tooltip={true}>
-                            <View style={MapStyle.calloutContainer}>
-                                <Text style={MapStyle.title}>{stall.name}</Text>
-                                <Text style={MapStyle.cuisine}>{stall.cuisine}</Text>
-                                <Text style={MapStyle.rating}>{stall.rating}</Text>
-                                {stall.location && (<Text style={MapStyle.location}>{stall.location}</Text>)}
-                            </View>
-                        </Callout>
-                    </Marker>
-                ))}
-            </MapView>
-            <View style={MapStyle.mapSearchRow}>
-                <TouchableOpacity
-                    style={MapStyle.mapSearchBar}
-                    onPress={() => router.push('/searchOptions')}
+        <SafeAreaView style={{flex: 1, backgroundColor:'#fff'}}>
+            <View style={{flex: 1}}>
+                <MapView
+                    ref={mapRef}
+                    style={MapStyle.map} 
+                    initialRegion={SINGAPORE_MAP}
+                    showsUserLocation={true}
+                    showsMyLocationButton={false}
                 >
-                    <Feather name="search" size={20} color='gray'/>
-                    <Text style={{marginLeft: 10, color: 'gray'}}>Search for places...</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    style={{
-                        backgroundColor: '#fff',
-                        padding: 10,
-                        borderRadius: 8,
-                        shadowColor: '#000',
-                        shadowOpacity: 0.1,
-                        shadowOffset: {width: 0, height: 2},
-                        elevation: 3,
-                    }}
-                    onPress={() => {
-                        if (userLocation) {
-                            mapRef.current?.animateToRegion({
-                                latitude: userLocation.latitude,
-                                longitude: userLocation.longitude,
-                                latitudeDelta: 0.05,
-                                longitudeDelta: 0.05,
-                            });
-                        }
-                    }}
-                >
-                    <Feather name="navigation" size={20} color="gray"/>
-                </TouchableOpacity>
-            </View>
-            {selectedStall && (
-                <View style={MapStyle.modalContainer}>
-                    <View style={MapStyle.modalContent}>
-                        <Text style={MapStyle.modalTitle}>{selectedStall.name}</Text>
-                        <Text style={MapStyle.modalCuisine}>{selectedStall.cuisine}</Text>
-                        <StarRating rating={selectedStall.rating}/>
-                        {selectedStall.location && (
-                            <Text style={MapStyle.location}>{selectedStall.location}</Text>
-                        )}
-                        <TouchableOpacity
-                            style={MapStyle.navStall}
-                            onPress={() => navStall(selectedStall)}>
-                            <Text style={MapStyle.navText}>See More</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity 
-                            style={MapStyle.closeIcon}
-                            onPress={() => setSelectedStall(null)}>
-                            <Feather name="x" size={18} color='333'/>
-                        </TouchableOpacity>
-                    </View>
+                    {filterStalls.map(stall => (
+                        <Marker
+                            key={stall.id}
+                            coordinate={{latitude: stall.latitude, longitude:stall.longitude}}
+                            onPress={() => setSelectedStall(stall)}
+                            >
+                            <Callout tooltip={true}>
+                                <View style={MapStyle.calloutContainer}>
+                                    <Text style={MapStyle.title}>{stall.name}</Text>
+                                    <Text style={MapStyle.cuisine}>{stall.cuisine}</Text>
+                                    <Text style={MapStyle.rating}>{stall.rating}</Text>
+                                    {stall.location && (<Text style={MapStyle.location}>{stall.location}</Text>)}
+                                </View>
+                            </Callout>
+                        </Marker>
+                    ))}
+                </MapView>
+                <View style={MapStyle.mapSearchRow}>
+                    <TouchableOpacity
+                        style={MapStyle.mapSearchBar}
+                        onPress={() => router.push('/searchOptions')}
+                    >
+                        <Feather name="search" size={20} color='gray'/>
+                        <Text style={{marginLeft: 10, color: 'gray'}}>Search for places...</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={{
+                            backgroundColor: '#fff',
+                            padding: 10,
+                            borderRadius: 8,
+                            shadowColor: '#000',
+                            shadowOpacity: 0.1,
+                            shadowOffset: {width: 0, height: 2},
+                            elevation: 3,
+                        }}
+                        onPress={() => {
+                            if (userLocation) {
+                                mapRef.current?.animateToRegion({
+                                    latitude: userLocation.latitude,
+                                    longitude: userLocation.longitude,
+                                    latitudeDelta: 0.05,
+                                    longitudeDelta: 0.05,
+                                });
+                            }
+                        }}
+                    >
+                        <Feather name="navigation" size={20} color="gray"/>
+                    </TouchableOpacity>
                 </View>
-            )}
-        <BotNavBar shiftUp={true}/>    
-        </View>
+                {selectedStall && (
+                    <View style={MapStyle.modalContainer}>
+                        <View style={MapStyle.modalContent}>
+                            <Text style={MapStyle.modalTitle}>{selectedStall.name}</Text>
+                            <Text style={MapStyle.modalCuisine}>{selectedStall.cuisine}</Text>
+                            <StarRating rating={selectedStall.rating}/>
+                            {selectedStall.location && (
+                                <Text style={MapStyle.location}>{selectedStall.location}</Text>
+                            )}
+                            <TouchableOpacity
+                                style={MapStyle.navStall}
+                                onPress={() => navStall(selectedStall)}>
+                                <Text style={MapStyle.navText}>See More</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity 
+                                style={MapStyle.closeIcon}
+                                onPress={() => setSelectedStall(null)}>
+                                <Feather name="x" size={18} color='333'/>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+            <BotNavBar/>    
+            </View>
+        </SafeAreaView>
     );
 };
 

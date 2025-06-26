@@ -63,7 +63,7 @@ const MapStyle = StyleSheet.create({
     },
     modalContainer: {
         position: 'absolute',
-        bottom: 20,
+        bottom: 80,
         left: 20,
         right: 20,
         backgroundColor: 'white',

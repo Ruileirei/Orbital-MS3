@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const userPage = () => {
@@ -17,8 +18,7 @@ const userPage = () => {
         avatar: 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg',
         favourites: [] as string[],
     });
-    const [favStall, setFavStall] = useState<{id: string; name: string}[]>([]);
-    const [showFavourites, setShowFavourites] = useState(false);
+    const [favStall, setFavStall] = useState<{id: string; name: string; cuisine: string}[]>([]);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -43,7 +43,7 @@ const userPage = () => {
 
     useEffect(() => {
         const fetchFavourite = async () => {
-            const stalls: {id: string; name: string}[] = [];
+            const stalls: {id: string; name: string; cuisine: string}[] = [];
 
             for (const stallId of userData.favourites) {
                 try {
@@ -54,11 +54,13 @@ const userPage = () => {
                         stalls.push ({
                         id: stallId,
                         name: stallData.name || "Unnamed stall",
+                        cuisine: stallData.cuisine || ""
                         });
                     } else {
                         stalls.push({
                             id: stallId,
                             name: "Unknown stall",
+                            cuisine: "-"
                         });
                     }
                 } catch (error) {
@@ -66,6 +68,7 @@ const userPage = () => {
                     stalls.push({
                         id: stallId,
                         name: "Error loading stall",
+                        cuisine: "-"
                     });
                 }
             }
@@ -108,16 +111,49 @@ const userPage = () => {
                         </View>
                     </View>
                     <ScrollView style={{flex: 1}} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 180}}>
+                        <View style={{marginBottom: 20}}>
+                            <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom: 10}}>
+                                <View style={{flexDirection:'row', alignItems: 'center'}}>
+                                    <MaterialCommunityIcons name="bookmark" size={20} color="#ffb933"/>
+                                    <Text style={{marginLeft:6, fontWeight:'600', fontSize: 16}}>Saved</Text>
+                                </View>
+                                <TouchableOpacity onPress={() => router.push('/userSavedStalls')}>
+                                    <MaterialCommunityIcons name='arrow-right' size={20} color="#ffb933"/>
+                                </TouchableOpacity>
+                            </View>
+                            {favStall.length === 0 ? (
+                                <Text style={{fontSize: 14, color: 'gray'}}>You have no favourite stalls yet.</Text>)
+                                                    : (
+                                <FlatList
+                                    data={favStall}
+                                    horizontal
+                                    keyExtractor={(item) => item.id}
+                                    showsHorizontalScrollIndicator={false}
+                                    contentContainerStyle={{paddingVertical: 4}}
+                                    renderItem={({item}) => (
+                                        <TouchableOpacity onPress={() => router.push({
+                                            pathname: '/stall/[id]',
+                                            params: {id: item.id, title: item.name},
+                                            })
+                                        }
+                                    style={{
+                                        width:180,
+                                        marginRight: 12,
+                                        padding: 12,
+                                        backgroundColor: "#f9f9f9",
+                                        borderRadius: 12,
+                                        borderColor: '#ddd',
+                                        borderWidth: 1, 
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <Text style={{fontSize: 14, fontWeight:'600', marginBottom: 6}}>{item.name}</Text>
+                                    <Text style={{ fontSize: 12, color: 'gray' }}>{item.cuisine || 'No cuisine info'}</Text>
+                                </TouchableOpacity>
+                                )}/>
+                            )}
+                        </View>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
-                            <TouchableOpacity
-                                onPress={() => setShowFavourites((prev) => !prev)}
-                                style={[userStyle.stallButton, { flex: 1, marginRight: 8 }]}
-                            >
-                                <MaterialCommunityIcons name="bookmark-outline" size={20} color="white" style={{ marginRight: 6 }} />
-                                <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>
-                                {showFavourites ? 'Hide Favourites' : 'Show Favourites'}
-                                </Text>
-                            </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => router.push('/editProfile')}
                                 style={[userStyle.stallButton, { flex: 1, marginLeft: 8 }]}
@@ -126,28 +162,6 @@ const userPage = () => {
                                 <Text style={{ color: 'white', fontSize: 14, fontWeight: '500' }}>Edit Profile</Text>
                             </TouchableOpacity>
                         </View>
-                        {showFavourites && (
-                            <View>
-                                {favStall.length === 0 ? (
-                                    <Text style={{ fontSize: 14, color: "gray" }}>You have no favourite stalls yet.</Text>
-                                ) : (
-                                    favStall.map((stall, index) => (
-                                        <TouchableOpacity
-                                        key={index}
-                                        onPress={() =>
-                                            router.push({
-                                                pathname: "/stall/[id]",
-                                                params: { id: stall.id, title: stall.name },
-                                            })
-                                        }
-                                        style={userStyle.favouriteButton}
-                                        >   
-                                            <Text style={{ fontSize: 16 }}>{stall.name}</Text>
-                                        </TouchableOpacity>
-                                    ))
-                                )}
-                            </View>
-                        )}
                     </ScrollView>
                     <View style={{ position: 'absolute', bottom: 70, left: 20, right: 20 }}>
                         <TouchableOpacity

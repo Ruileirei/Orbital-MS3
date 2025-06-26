@@ -9,6 +9,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="forgetPW" options={{title:'Forget Password'}}/>
           <Stack.Screen name="main" options={{ headerShown: false }} />
           <Stack.Screen name="stall/[id]"/>
           <Stack.Screen name="group/[id]"/>
@@ -16,6 +17,7 @@ export default function RootLayout() {
           <Stack.Screen name="filter" options={{ title: "Filter", headerShown: false }} />
           <Stack.Screen name="search" options={{headerShown: false}}/>
           <Stack.Screen name="user" options={{ title: "User Profile", headerShown: false }} />
+          <Stack.Screen name="userSavedStalls" options={{title: "Your Saved Stalls"}}/>
           <Stack.Screen name="Map" options={{ title: "Map", headerShown: true }} />
           <Stack.Screen name="register" options={{headerShown: false}}/>
           <Stack.Screen name="nearby" options={{headerShown: false}}/>

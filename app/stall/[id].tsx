@@ -3,12 +3,13 @@ import StarRating from "@/Components/starRating";
 import { auth, db } from "@/firebase/firebaseConfig";
 import { formatTime } from "@/utils/formatTime";
 import { getOpenStatus, OpenStatus } from '@/utils/isOpenStatus';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Icon } from "@rneui/themed";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { arrayRemove, arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
-import Carousel from 'react-native-reanimated-carousel';
+import { ActivityIndicator, Dimensions, FlatList, Image, Modal, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 
 const {width: screenWidth} = Dimensions.get('window');
@@ -34,6 +35,8 @@ const StallInfo = () => {
     const [loading, setLoading] = useState(true);
     const [isSaved, setIsSaved] = useState(false);
     const [isOpenHrDropDown, setOpenHrDropDown] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isModalVisible, setModalVisible] = useState(false);
 
     const openStatus: OpenStatus = getOpenStatus(stallData?.openingHours ?? {});
     let statusText = '';
@@ -282,20 +285,79 @@ const StallInfo = () => {
             )}
 
             <Text style={StallStyle.sectionTitle}>Menu</Text>
-            <Carousel
-                width={screenWidth}
-                height={300}
+            <FlatList
                 data={images}
-                renderItem={renderCarouselItem}
-                mode="parallax"
-                modeConfig={{
-                    parallaxScrollingScale: 0.95,
-                    parallaxScrollingOffset: 57,
-                }}
-                loop={images.length > 1}
-                autoPlay={false}
-                snapEnabled={images.length > 1}
+                horizontal
+                keyExtractor={(item, index) => `${item}-${index}`}
+                showsHorizontalScrollIndicator={false}
+                renderItem={({item}) => (
+                    <TouchableOpacity
+                        onPress={() => {
+                            setSelectedImage(item);
+                            setModalVisible(true);
+                        }}
+                    >
+                        <Image
+                            source={{uri: item}}
+                            style={{
+                                width: screenWidth-40,
+                                height: 300,
+                                borderRadius: 12,
+                                marginRight: 20,
+                                marginLeft: -16,
+                                resizeMode:'cover'
+                            }}
+                        />
+                    </TouchableOpacity>
+                )}
+                contentContainerStyle={{paddingHorizontal: 20}}
             />
+            {selectedImage && (
+                <Modal visible={isModalVisible} transparent={true}>
+                    <View style={{
+                        flex: 1,
+                        backgroundColor: 'gray',
+                        opacity: 0.9,
+                        justifyContent:'center',
+                        alignItems:'center'
+                    }}>
+                        <TouchableOpacity
+                            onPress={() => setModalVisible(false)}
+                            style={{
+                                position: 'absolute',
+                                top: 40,
+                                right: 20,
+                                zIndex: 10,
+                            }}
+                        >
+                            <MaterialCommunityIcons name="close" size={20} color='white'/>
+                        </TouchableOpacity>
+                        <ScrollView
+                            contentContainerStyle={{
+                                flexGrow: 1,
+                                justifyContent:'flex-start',
+                                alignItems:'center',
+                                paddingTop: 60,
+                            }}
+                            maximumZoomScale={4}
+                            minimumZoomScale={1}
+                            showsHorizontalScrollIndicator={false}
+                            showsVerticalScrollIndicator={false}
+                            bounces={false}
+                            centerContent
+                        >
+                            <Image  
+                                source={{uri: selectedImage}}
+                                style={{
+                                    width: screenWidth * 0.9,
+                                    aspectRatio: 3/5,
+                                    resizeMode: 'contain',
+                                }}
+                            />
+                        </ScrollView>
+                    </View>
+                </Modal>
+            )}
         </View>
     );
 };
