@@ -22,8 +22,6 @@ const filterScreen = () => {
     );
     
     const [hideClosed, setHideClosed] = useState(hideClosedParam);
-    const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
-    const dietaryOptions = ['Halal', 'Vegetarian'];
     
     const initialSelectedMisc = hideClosedParam ? ['Hide Closed Stalls'] : [];
     const [selectedMisc, setSelectedMisc] = useState<string[]>(initialSelectedMisc);
@@ -60,14 +58,6 @@ const filterScreen = () => {
         }
     };
 
-    const toggleDietary = (option: string) => {
-        if (selectedDietary.includes(option)) {
-            setSelectedDietary(selectedDietary.filter(o => o !== option));
-        } else {
-            setSelectedDietary([...selectedDietary, option]);
-        }
-    };
-
     const toggleMisc = (option: string) => {
         const newSelectedMisc = selectedMisc.includes(option)
         ? selectedMisc.filter(o => o !== option)
@@ -88,7 +78,6 @@ const filterScreen = () => {
     const handleClear = () => {
         setSelectedCuisines([]);
         setHideClosed(false);
-        setSelectedDietary([]);
         setSortByRating('None');
     }
 
@@ -113,13 +102,6 @@ const filterScreen = () => {
                     onToggleOption={toggleCuisine}
                 />
                 <FilterDropdown
-                    title="Dietary Requirements"
-                    options={dietaryOptions}
-                    selectedOptions={selectedDietary}
-                    onToggleOption={toggleDietary}
-                />
-
-                <FilterDropdown
                     title="Miscellaneous"
                     options={miscOptions}
                     selectedOptions={selectedMisc}
@@ -136,7 +118,7 @@ const filterScreen = () => {
                     containerStyle={{flex: 1, marginRight: 10}}
                 />
                 <Button
-                    title={`Apply (${selectedCuisine.length + selectedDietary.length + selectedMisc.length})`}
+                    title={`Apply (${selectedCuisine.length + selectedMisc.length})`}
                     onPress={applyFilter}
                     buttonStyle={{backgroundColor:"black", borderRadius: 10}}
                     titleStyle={{color: 'white'}}

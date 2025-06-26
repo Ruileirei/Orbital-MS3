@@ -12,6 +12,7 @@ export default function RootLayout() {
           <Stack.Screen name="main" options={{ headerShown: false }} />
           <Stack.Screen name="stall/[id]"/>
           <Stack.Screen name="group/[id]"/>
+          <Stack.Screen name="searchOptions" options={{title: "Search", presentation:'modal'}}/>
           <Stack.Screen name="filter" options={{ title: "Filter", headerShown: false }} />
           <Stack.Screen name="search" options={{headerShown: false}}/>
           <Stack.Screen name="user" options={{ title: "User Profile", headerShown: false }} />

@@ -91,9 +91,14 @@ const GroupPage = () => {
     );
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#fff", paddingTop: -35 }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#fff"}}>
 
-            {loading ? (<ActivityIndicator size="large" style={{ marginTop: 20 }} />)
+            {loading ? (
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ marginTop: 12, color: 'gray' }}>Loading group stalls...</Text>
+                            <ActivityIndicator size="large" color="#ffb933" />
+                        </View>
+                       )
                      : stalls.length === 0 ? (
                         <View style={{ paddingHorizontal: 16 }}>
                             <Text style={{ color: "gray" }}>No stalls found for this group.</Text>
@@ -104,7 +109,7 @@ const GroupPage = () => {
                             data={stalls}
                             keyExtractor={(item) => item.id}
                             renderItem={renderStall}
-                            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: -10 }}
+                            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: -10, paddingBottom: 10 }}
                         />
                         )
             }

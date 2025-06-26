@@ -4,14 +4,17 @@ import { Text, TouchableOpacity, View } from "react-native";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import NavBarStyle from "./NavBarStyle";
 
-const BotNavBar = () => {
+const BotNavBar = ({shiftUp = false}) => {
     const router = useRouter();
     const pathName = usePathname();
 
     const isActive = (route: string) => pathName.startsWith(route);
 
     return (
-        <View style={NavBarStyle.botNav}>
+        <View style={[
+            NavBarStyle.botNav,
+            shiftUp && {bottom: 20},
+        ]}>
             <TouchableOpacity 
                 style={NavBarStyle.navButton}
                 onPress={() => router.push('/main')}>
@@ -43,7 +46,7 @@ const BotNavBar = () => {
                 <MaterialIcons
                     name="map"
                     size={28}
-                    color="gray"
+                    color={isActive('/Map') ? '#ffb933' : 'gray'}
                 />
                 <Text style={NavBarStyle.navText}>Map</Text>
             </TouchableOpacity>

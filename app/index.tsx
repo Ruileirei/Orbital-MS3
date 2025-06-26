@@ -3,7 +3,8 @@ import { auth } from "@/firebase/firebaseConfig";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
-import { Alert, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 const LoginScreen = () => {
     const router = useRouter();
     const [email, setEmail] = useState("");
@@ -51,51 +52,53 @@ const LoginScreen = () => {
     };
 
     return (
-        <View style={LoginStyles.background}>
-
-          
-          <Text style={LoginStyles.shutter}> shutter </Text>
-          <Image source={require('../assets/images/FoodFindrLogo.jpg')} 
-            style={LoginStyles.foodfindrLogo}/>
-
-          <View style={LoginStyles.loginBox}>
-
-            <TextInput
-              style={LoginStyles.input}
-              placeholder="Email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-            />
-            <TextInput
-              style={LoginStyles.input}
-              placeholder="Password"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
+        <SafeAreaView style={LoginStyles.background}>
+          <ScrollView 
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start', paddingBottom: 50, paddingTop: 120, alignItems: 'center' }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Image source={require('../assets/images/FoodFindrLogoRMBG.png')} 
+                  style={LoginStyles.foodfindrLogo}
+                  resizeMode="contain"
             />
 
-            <View style={LoginStyles.buttonContainer}>
-              <TouchableOpacity style={LoginStyles.button} onPress={checkLogin} disabled={loading}>
-                <Text style={LoginStyles.buttonText}>Login</Text>
-              </TouchableOpacity>
+            <View style={LoginStyles.loginBox}>
+
+              <TextInput
+                style={LoginStyles.input}
+                placeholder="Email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+              />
+              <TextInput
+                style={LoginStyles.input}
+                placeholder="Password"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+
+              <View style={LoginStyles.buttonContainer}>
+                <TouchableOpacity style={LoginStyles.button} onPress={checkLogin} disabled={loading}>
+                  <Text style={LoginStyles.buttonText}>Login</Text>
+                </TouchableOpacity>
+
+              </View>
+              
 
             </View>
-            
-
-          </View>
-
-          <View style={{flex: 1}}></View>
 
 
-          <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={LoginStyles.registerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={checkRegister}>
-              <Text style={LoginStyles.link}>Register</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+            <View style={LoginStyles.bottomRegister}>
+              <Text style={LoginStyles.registerText}>Don't have an account? </Text>
+              <TouchableOpacity onPress={checkRegister}>
+                <Text style={LoginStyles.link}>Register</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
   );
 };
 

@@ -4,6 +4,29 @@ const MapStyle = StyleSheet.create({
     map: {
         flex: 1
     },
+    mapSearchRow: {
+        position: 'absolute',
+        top: 10,
+        left: 10,
+        right: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        zIndex: 999,
+    },
+    mapSearchBar: {
+        flex: 1,
+        marginRight: 8,
+        backgroundColor: '#fff',
+        padding: 12,
+        borderRadius: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 5,
+    },
     calloutContainer: {
         width: 200,
         padding: 10,

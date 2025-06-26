@@ -7,7 +7,7 @@ import { Icon } from '@rneui/themed';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { collection, getDocs } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 interface Stall {
@@ -28,6 +28,7 @@ const SearchScreen = () => {
     const [stallsCache, setStallsCache] = useState<Stall[]>([]);
     const [currPage, setCurrPage] = useState(1);
     const [searchValue, setSearchValue] = useState('');
+    const [loading, setLoading] = useState(true);
 
     const pageSize = 10;
     const params = useLocalSearchParams();
@@ -57,6 +58,8 @@ const SearchScreen = () => {
                 setCurrPage(1);
             } catch (error) {
                 console.error('Error fetching stalls:', error);
+            } finally {
+                setLoading(false);
             }
         }
         fetchStalls();
@@ -170,6 +173,17 @@ const SearchScreen = () => {
             </View>
         );
     };
+
+    if (loading) {
+        return (
+            <SafeAreaProvider style={{flex: 1}}>
+                <SafeAreaView style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                    <Text style={{marginTop: 12, color: 'gray'}}>Loading stalls...</Text>
+                    <ActivityIndicator size="large" color="#ffb933" />
+                </SafeAreaView>
+            </SafeAreaProvider>
+        );
+    }
 
     return (
         <SafeAreaProvider style={{ flex: 1 }}>

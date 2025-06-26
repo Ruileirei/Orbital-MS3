@@ -1,11 +1,13 @@
 import MapStyle from "@/Components/MapsPageStyle";
+import BotNavBar from "@/Components/navigationBar";
 import StarRating from "@/Components/starRating";
 import { db } from "@/firebase/firebaseConfig";
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
+import * as location from 'expo-location';
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { collection, getDocs } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Callout, Marker, Region } from 'react-native-maps';
 
 type Stall = {
@@ -24,13 +26,16 @@ const SINGAPORE_MAP: Region = {
     latitudeDelta: 0.1,
     longitudeDelta: 0.1,
 };
-const Max_zoom = 1;
 
 const MapScreen: React.FC = () => {
     const [stalls, setStalls] = useState<Stall[]>([]);
     const [loading, setLoading] = useState(true);
+    const [filterStalls, setFilterStalls] = useState<Stall[]>([]);
     const [selectedStall, setSelectedStall] = useState<Stall | null>(null);
+    const [userLocation, setUserLocation] = useState<{latitude: number; longitude: number} | null>(null);
     const router = useRouter();
+    const mapRef = useRef<MapView>(null);
+    const {mode, lat, lng} = useLocalSearchParams<{mode?: string; lat?: string; lng?: string}>();
 
     useEffect(() => {
         const fetchStalls = async () => {
@@ -51,6 +56,69 @@ const MapScreen: React.FC = () => {
         fetchStalls();
     }, []);
 
+    const getDistance = (lat1: number, long1: number, lat2: number, long2: number) => {
+        const R = 6371; // km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLong = (long2 - long1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLong / 2) * Math.sin(dLong / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    };
+
+    useEffect(() => {
+        (async () => {
+            let { status } = await location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+                console.log('Permission to access location was denied');
+                return;
+            }
+            let loc = await location.getCurrentPositionAsync({});
+            setUserLocation({
+                latitude: loc.coords.latitude,
+                longitude: loc.coords.longitude
+            });
+        })();
+    }, []);
+
+    useEffect(() => {
+        if (!stalls.length) return;
+        if (mode === 'place' && lat && lng) {
+            const centerLat = parseFloat(lat);
+            const centerLong = parseFloat(lng);
+            mapRef.current?.animateToRegion({
+                latitude: centerLat,
+                longitude: centerLong,
+                latitudeDelta: 0.05, 
+                longitudeDelta: 0.05,
+            }, 1000);
+            const nearby = stalls.filter(stall=> {
+                const dist = getDistance(centerLat, centerLong, stall.latitude, stall.longitude);
+                return dist <= 2;
+            });
+            setFilterStalls(nearby);
+        } else if (mode ==='all') {
+            mapRef.current?.animateToRegion(SINGAPORE_MAP, 1000);
+            setFilterStalls(stalls);
+        }
+        if (mode === 'nearby' && userLocation) {
+            mapRef.current?.animateToRegion({
+                latitude: userLocation.latitude,
+                longitude: userLocation.longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+            }, 1000);
+
+            const nearby = stalls.filter(stall => {
+                const dist = getDistance(userLocation.latitude, userLocation.longitude, stall.latitude, stall.longitude);
+                return dist <= 2;
+            });
+            setFilterStalls(nearby);
+        }
+    }, [mode, lat, lng, stalls]);
+
     const navStall = (item: Stall) => {
         router.push({
             pathname:'/stall/[id]',
@@ -66,15 +134,22 @@ const MapScreen: React.FC = () => {
     if (loading) {
         return (
             <View style={MapStyle.centered}>
-                <Text>Loading stalls...</Text>
+                <Text>Loading...</Text>
+                <ActivityIndicator size='large' color='#ffb933'/>
             </View>
         );
     }
 
     return (
         <View style={{flex: 1}}>
-            <MapView style={MapStyle.map} initialRegion={SINGAPORE_MAP}>
-                {stalls.map(stall => (
+            <MapView
+                ref={mapRef}
+                style={MapStyle.map} 
+                initialRegion={SINGAPORE_MAP}
+                showsUserLocation={true}
+                showsMyLocationButton={false}
+            >
+                {filterStalls.map(stall => (
                     <Marker
                         key={stall.id}
                         coordinate={{latitude: stall.latitude, longitude:stall.longitude}}
@@ -91,6 +166,38 @@ const MapScreen: React.FC = () => {
                     </Marker>
                 ))}
             </MapView>
+            <View style={MapStyle.mapSearchRow}>
+                <TouchableOpacity
+                    style={MapStyle.mapSearchBar}
+                    onPress={() => router.push('/searchOptions')}
+                >
+                    <Feather name="search" size={20} color='gray'/>
+                    <Text style={{marginLeft: 10, color: 'gray'}}>Search for places...</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={{
+                        backgroundColor: '#fff',
+                        padding: 10,
+                        borderRadius: 8,
+                        shadowColor: '#000',
+                        shadowOpacity: 0.1,
+                        shadowOffset: {width: 0, height: 2},
+                        elevation: 3,
+                    }}
+                    onPress={() => {
+                        if (userLocation) {
+                            mapRef.current?.animateToRegion({
+                                latitude: userLocation.latitude,
+                                longitude: userLocation.longitude,
+                                latitudeDelta: 0.05,
+                                longitudeDelta: 0.05,
+                            });
+                        }
+                    }}
+                >
+                    <Feather name="navigation" size={20} color="gray"/>
+                </TouchableOpacity>
+            </View>
             {selectedStall && (
                 <View style={MapStyle.modalContainer}>
                     <View style={MapStyle.modalContent}>
@@ -114,6 +221,7 @@ const MapScreen: React.FC = () => {
                     </View>
                 </View>
             )}
+        <BotNavBar shiftUp={true}/>    
         </View>
     );
 };

@@ -164,8 +164,9 @@ const StallInfo = () => {
     
     if (loading) {
         return (
-            <View style={[StallStyle.container, {justifyContent: "center", alignItems:"center"}]}>
-                <ActivityIndicator size="large"/>
+            <View style={[StallStyle.container, {justifyContent:"center", alignItems:"center"}]}>
+                <Text style={{ marginTop: 12, color: 'gray' }}>Loading stall...</Text>
+                <ActivityIndicator size="large" color="#ffb933"/>
             </View>
         );
     }

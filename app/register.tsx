@@ -1,12 +1,11 @@
-//import RegisterStyle from "@/Components/RegisterStyle";
-import LoginStyles from "@/Components/LoginPageStyle";
-//import { registerUser } from "@/firebase/userRegister";
+import RegisterStyle from "@/Components/RegisterStyle";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
-import { Alert, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { auth, db } from "../firebase/firebaseConfig";
+
 
 const Register = () => {
     const router = useRouter();
@@ -68,81 +67,64 @@ const Register = () => {
             setLoading(false);
         }
     }
-    
-    /*
-    const first = async () => {
-        if (!username || !email || !password) {
-            Alert.alert("Please fill in all fields");
-            return;
-        }
-        setLoading(true);
-        try {
-            await registerUser(username, email, password);
-            Alert.alert("Registered successfully! Please Login.");
-            router.replace('/');
-        } catch (error: any) {
-            if (error.message.includes("Username is already taken")) {
-                Alert.alert("Username is already taken");
-            } else if (error.message.includes("Email is already in use")) {
-                Alert.alert("Email is already in use");
-            } else {
-                Alert.alert("Registration failed", error.message || "Unknown error occured");
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-    */ 
    
 
     return (
-        <View style={LoginStyles.background}>
-            <Text style={LoginStyles.shutter}> shutter </Text>
-            <Image source={require('../assets/images/FoodFindrLogo.jpg')} 
-            style={LoginStyles.foodfindrLogo}/>
-
-            <View style={LoginStyles.loginBox}>
-                <TextInput 
-                    style={LoginStyles.input}
-                    placeholder="Username"
-                    value={username} 
-                    onChangeText={setUsername} 
-                    autoCapitalize="none"
+        <SafeAreaView style={RegisterStyle.background}>
+            <ScrollView
+                contentContainerStyle={{
+                    flexGrow: 1,
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    paddingTop: 120,
+                    paddingBottom: 50,
+                }}
+                keyboardShouldPersistTaps='handled'
+            >
+                <Image source={require('../assets/images/FoodFindrLogoRMBG.png')} 
+                    style={RegisterStyle.foodfindrLogo}
+                    resizeMode='contain'
                 />
 
-                <TextInput 
-                    placeholder="Email" 
-                    style={LoginStyles.input} 
-                    value={email} 
-                    onChangeText={setEmail} 
-                    keyboardType="email-address" 
-                    autoCapitalize="none"
-                />
+                <View style={RegisterStyle.registerBox}>
+                    <TextInput 
+                        style={RegisterStyle.input}
+                        placeholder="Username"
+                        value={username} 
+                        onChangeText={setUsername} 
+                        autoCapitalize="none"
+                    />
 
-                <TextInput 
-                    placeholder="Password" 
-                    style={LoginStyles.input} 
-                    value={password} 
-                    onChangeText={setPassword} 
-                    secureTextEntry
-                />
+                    <TextInput 
+                        placeholder="Email" 
+                        style={RegisterStyle.input} 
+                        value={email} 
+                        onChangeText={setEmail} 
+                        keyboardType="email-address" 
+                        autoCapitalize="none"
+                    />
 
-                <View style={LoginStyles.buttonContainer}>
+                    <TextInput 
+                        placeholder="Password" 
+                        style={RegisterStyle.input} 
+                        value={password} 
+                        onChangeText={setPassword} 
+                        secureTextEntry
+                    />
 
-                    <TouchableOpacity 
-                        style={LoginStyles.button} 
-                        onPress={handleRegister} 
-                        disabled={loading}
-                    >
-                        <Text style={LoginStyles.buttonText}>Register</Text>
-                    </TouchableOpacity>
+                    <View style={RegisterStyle.buttonContainer}>
 
+                        <TouchableOpacity 
+                            style={RegisterStyle.button} 
+                            onPress={handleRegister} 
+                            disabled={loading}
+                        >
+                            <Text style={RegisterStyle.buttonText}>Register</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-
-
-            </View>
-
-        </View>
+           </ScrollView>     
+        </SafeAreaView>
     );
 };
 

@@ -6,7 +6,7 @@ import { getOpenStatus } from '@/utils/isOpenStatus';
 import { Icon } from '@rneui/themed';
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import SearchStyle from "../Components/SearchStyle";
 
@@ -29,6 +29,7 @@ const NearbyScreen = () => {
     const [stallsCache, setStallsCache] = useState<Stall[]>([]);
     const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
     const [currPage, setCurrPage] = useState(1);
+    const [loading, setLoading] = useState(true);
 
     const pageSize = 10;
     const params = useLocalSearchParams();
@@ -70,6 +71,8 @@ const NearbyScreen = () => {
                 setCurrPage(1);
             } catch (error) {
                 console.error("Error fetching nearby stalls");
+            } finally {
+                setLoading(false);
             }
         }
         fetchNearbyStalls();
@@ -172,6 +175,17 @@ const NearbyScreen = () => {
             </View>
         );
     };
+
+    if (loading) {
+        return (
+            <SafeAreaProvider style={{ flex: 1 }}>
+                <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ marginTop: 12, color: 'gray' }}>Loading nearby stalls...</Text>
+                    <ActivityIndicator size="large" color="#ffb933" />
+                </SafeAreaView>
+            </SafeAreaProvider>
+        );
+    }
 
     return (
         <SafeAreaProvider style={{ flex: 1 }}>
