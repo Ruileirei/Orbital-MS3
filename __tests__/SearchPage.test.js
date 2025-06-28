@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import SearchScreen from '../SearchScreen';
+import SearchScreen from '../app/SearchScreen';
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
