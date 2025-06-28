@@ -1,5 +1,5 @@
 import { fireEvent, render } from '@testing-library/react-native';
-import MainPage from '../MainPage';
+import MainPage from './app/MainPage';
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({

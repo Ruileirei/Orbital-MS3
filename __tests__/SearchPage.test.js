@@ -1,5 +1,4 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import { Text, TouchableOpacity } from 'react-native';
 import SearchScreen from '../SearchScreen';
 
 const mockPush = jest.fn();
@@ -62,11 +61,18 @@ jest.mock('@/utils/isOpenStatus', () => ({
   getOpenStatus: jest.fn(() => 'OPEN'),
 }));
 
-jest.mock('@/Components/StallItem', () => ({ item, onPress }) => (
-  <TouchableOpacity onPress={() => onPress(item)}>
-    <Text>{item.title}</Text>
-  </TouchableOpacity>
-));
+const React = require('react');
+
+jest.mock('@/Components/StallItem', () => {
+  const React = require('react');
+  const { Text, TouchableOpacity } = require('react-native');
+  return ({ item, onPress }) =>
+    React.createElement(
+      TouchableOpacity,
+      { onPress: () => onPress(item) },
+      React.createElement(Text, null, item.title)
+    );
+});
 
 describe('SearchScreen', () => {
   beforeEach(() => {
