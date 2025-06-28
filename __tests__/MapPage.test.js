@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
-import MapScreen from '../app/MapScreen';
+import MapScreen from '../app/Map';
 
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
