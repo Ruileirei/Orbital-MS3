@@ -1,15 +1,14 @@
 module.exports = {
   preset: 'jest-expo',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  transform: {
+    '^.+\\.[jt]sx?$': 'babel-jest',
+  },
   transformIgnorePatterns: [
-    'node_modules/(?!(jest-)?react-native|@react-native|expo(nent)?|@expo(nent)?|react-native-safe-area-context|@react-navigation)',
+    'node_modules/(?!(expo|@expo|expo-.*|firebase|@firebase/.*|@firebase|react-native|@react-native|@react-navigation|react-native-.*|@rneui)/)',
   ],
-  testEnvironment: 'node',
-  testEnvironmentOptions: {
-    node: '16'
-  }
-};
 
+  setupFiles: ['./jest.setup.js'],
+};
 
 
 
