@@ -38,8 +38,8 @@ jobs:
         run: npm install -g yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm install
 
       - name: Run tests
-        run: yarn test
+        run: npx jest
 
