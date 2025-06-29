@@ -1,4 +1,4 @@
-jest.mock('@/hooks/useStalls', () => ({
+jest.mock('@/src/hooks/useStalls', () => ({
   useStalls: jest.fn(),
 }));
 
