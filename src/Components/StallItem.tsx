@@ -1,5 +1,5 @@
-import StarRating from '@/Components/starRating';
-import { getOpenStatus } from '@/utils/isOpenStatus';
+import StarRating from '@/src/Components/starRating';
+import { getOpenStatus } from '@/src/utils/isOpenStatus';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';

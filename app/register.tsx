@@ -1,10 +1,8 @@
-import RegisterStyle from "@/Components/RegisterStyle";
+import { registerUser, saveUserData } from "@/services/firebaseRegisterService";
+import RegisterStyle from "@/src/Components/RegisterStyle";
 import { useRouter } from "expo-router";
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { Alert, Image, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { auth, db } from "../firebase/firebaseConfig";
 
 
 const Register = () => {
@@ -27,15 +25,16 @@ const Register = () => {
         // can add additional password checks here. Firebase has a strict password requirement of 6 characters
 
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const userCredential = await registerUser(email, password);
             console.log('Registered:', userCredential.user);
             
-            await setDoc(doc(db, 'users', userCredential.user.uid), {
-                username: username,
-                email: email,
+            await saveUserData(userCredential.user.uid, {
+                username,
+                email,
                 favourites: [],
-                createdAt: new Date()
+                createdAt: new Date(),
             });
+
 
             setError('');
             setSuccess(true);

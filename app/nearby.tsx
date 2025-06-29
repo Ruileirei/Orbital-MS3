@@ -1,14 +1,14 @@
-import BotNavBar from '@/Components/navigationBar';
-import StallItem from '@/Components/StallItem';
-import { geoQuery } from '@/utils/geoQuery';
-import { getUserLocation } from '@/utils/getUserLocation';
-import { getOpenStatus } from '@/utils/isOpenStatus';
+import BotNavBar from '@/src/Components/navigationBar';
+import StallItem from '@/src/Components/StallItem';
+import { geoQuery } from '@/src/utils/geoQuery';
+import { getUserLocation } from '@/src/utils/getUserLocation';
+import { getOpenStatus } from '@/src/utils/isOpenStatus';
 import { Icon } from '@rneui/themed';
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import SearchStyle from "../Components/SearchStyle";
+import SearchStyle from "../src/Components/SearchStyle";
 
 interface Stall {
     id: string;

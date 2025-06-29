@@ -1,7 +1,7 @@
-import MapStyle from "@/Components/MapsPageStyle";
-import BotNavBar from "@/Components/navigationBar";
-import StarRating from "@/Components/starRating";
 import { db } from "@/firebase/firebaseConfig";
+import MapStyle from "@/src/Components/MapsPageStyle";
+import BotNavBar from "@/src/Components/navigationBar";
+import StarRating from "@/src/Components/starRating";
 import { Feather } from '@expo/vector-icons';
 import * as location from 'expo-location';
 import { useLocalSearchParams, useRouter } from "expo-router";

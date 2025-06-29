@@ -1,12 +1,12 @@
-import StallStyle from "@/Components/StallPageStyle";
-import StarRating from "@/Components/starRating";
-import { auth, db } from "@/firebase/firebaseConfig";
-import { formatTime } from "@/utils/formatTime";
-import { getOpenStatus, OpenStatus } from '@/utils/isOpenStatus';
+import { auth } from "@/firebase/firebaseConfig";
+import { arrayRemove, arrayUnion, getStallDoc, getUserDoc, updateUserDoc } from "@/services/firestoreService";
+import StallStyle from "@/src/Components/StallPageStyle";
+import StarRating from "@/src/Components/starRating";
+import { formatTime } from "@/src/utils/formatTime";
+import { getOpenStatus, OpenStatus } from '@/src/utils/isOpenStatus';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Icon } from "@rneui/themed";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { arrayRemove, arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { ActivityIndicator, Dimensions, FlatList, Image, Modal, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -67,22 +67,15 @@ const StallInfo = () => {
             return;
         }
         try {
-            const userRef = doc(db, 'users', auth.currentUser.uid);
-
             if (isSaved) {
-                await updateDoc(userRef, {
+                await updateUserDoc(auth.currentUser.uid, {
                     favourites: arrayRemove(id),
                 });
-                setIsSaved(false);
-                Toast.show({
-                    type: 'success',
-                    text1: 'Removed from favourites',
-                    text2: `${stallData?.name ?? title} was removed.`,
-                });
             } else {
-                await updateDoc(userRef, {
+                await updateUserDoc(auth.currentUser.uid, {
                     favourites: arrayUnion(id),
                 });
+
                 setIsSaved(true);
                 Toast.show({
                     type: 'success',
@@ -108,8 +101,7 @@ const StallInfo = () => {
                 return;
             }
             try {
-                const docRef = doc(db, "stalls", id.toString());
-                const docRes = await getDoc(docRef);
+                const docRes = await getStallDoc(id.toString());
 
                 if (docRes.exists()) {
                     setStallData(docRes.data() as any);
@@ -132,8 +124,7 @@ const StallInfo = () => {
             if (!auth.currentUser || !id) return;
 
             try {
-                const userRef = doc(db, 'users', auth.currentUser.uid);
-                const userSnap = await getDoc(userRef);
+                const userSnap = await getUserDoc(auth.currentUser.uid);
                 if (userSnap.exists()) {
                     const userData = userSnap.data();
                     const favourites = userData.favourites || [];

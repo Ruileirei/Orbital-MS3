@@ -4,7 +4,7 @@
     "slug": "foodfindr",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/FoodFindrLogoRMBG.png",
     "scheme": "foodfindr",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

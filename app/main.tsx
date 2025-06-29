@@ -1,16 +1,17 @@
-import mainStyle from '@/Components/mainStyle';
-import BotNavBar from '@/Components/navigationBar';
-import StarRating from '@/Components/starRating';
-import { auth, db } from '@/firebase/firebaseConfig';
-import { getOpenStatus } from '@/utils/isOpenStatus';
+import { auth } from '@/firebase/firebaseConfig';
+import { fetchAllStalls, fetchUserData } from "@/services/firestoreService";
+import CategoryList from '@/src/Components/CategoryList';
+import mainStyle from '@/src/Components/mainStyle';
+import BotNavBar from '@/src/Components/navigationBar';
+import StarRating from '@/src/Components/starRating';
+import { getOpenStatus } from '@/src/utils/isOpenStatus';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-type Stall = {
+export type Stall = {
   id: string;
   name?: string;
   title?: string;
@@ -21,14 +22,7 @@ type Stall = {
   };
 };
 
-const categories = [
-    {label: "Halal", value: 'halal', icon: "food-halal"},
-    {label: "Barbeque", value: 'barbeque', icon: "grill-outline" },
-    {label: "Chicken Rice", value:'chicken_rice', icon: "rice"},
-    {label: "Noodles", value: 'noodles', icon: "noodles"},
-    {label: "Editor's Picks", value: 'personal_Picks', icon: 'food'},
-    {label: "Vegetarian", value:'vegetarian', icon:'food-drumstick-off'}
-];
+
 
 const pickStall = (stalls: any[]) => {
     if (!stalls.length) return null;
@@ -49,15 +43,13 @@ const MainPage = () => {
             try {
                 const user = auth.currentUser;
                 if (user) {
-                    const docRef = doc(db, 'users', user.uid);
-                    const snap = await getDoc(docRef);
+                    const snap = await fetchUserData(user.uid);
                     if (snap.exists()) {
                         const data = snap.data();
                         setUsername(data.username || 'User');
                     }
                 }
-                const snap = await getDocs(collection(db, 'stalls'));
-                const allStalls : Stall[] = snap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                const allStalls = await fetchAllStalls();
                 const selected = pickStall(allStalls);
                 setStallOfTheDay(selected);
 
@@ -99,26 +91,7 @@ const MainPage = () => {
                             <Text style={{marginLeft: 8, color: 'gray'}}>Search for hawker food...</Text>
                         </TouchableOpacity>
                     </View>
-                    <View style={{padding: 20}}>
-                        <Text style={{fontSize: 16, fontWeight:'600', marginBottom: 10}}>Browse by Category</Text>
-                        <View style={mainStyle.categoryContainer}>
-                            {categories.map((cat, idx) => (
-                                <TouchableOpacity
-                                    key={idx}
-                                    onPress={() => router.push({
-                                        pathname: "./group/[id]",
-                                        params: { id: cat.value }
-                                    })}
-                                    style={mainStyle.categoryButton}
-                                >
-                                    <MaterialCommunityIcons name={cat.icon as any} size={24} color={"#fff"}/>
-                                    <Text style={{marginTop: 6, fontSize: 13, fontWeight: '500', color:'#fff'}}>
-                                        {cat.label}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </View>
+                    <CategoryList/>
                     {stallOfTheDay && (
                         <TouchableOpacity
                             onPress={() => router.push({

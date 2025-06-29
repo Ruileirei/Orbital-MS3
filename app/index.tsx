@@ -1,7 +1,6 @@
-import LoginStyles from "@/Components/LoginPageStyle";
-import { auth } from "@/firebase/firebaseConfig";
+import { signIn } from "@/services/firebaseAuthService";
+import LoginStyles from "@/src/Components/LoginPageStyle";
 import { useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,7 +18,7 @@ const LoginScreen = () => {
         } 
         setLoading(true);
         try {
-          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          const userCredential = await signIn(email, password);
           const user = userCredential.user;
           console.log("User logged in: ", user);
           router.replace('/main');
