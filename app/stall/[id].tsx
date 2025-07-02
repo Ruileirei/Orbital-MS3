@@ -146,15 +146,6 @@ const StallInfo = () => {
                : ["https://png.pngtree.com/png-vector/20221109/ourmid/pngtree-no-image-available-icon-flatvector-illustration-graphic-available-coming-vector-png-image_40958834.jpg"];
     }, [stallData]);
 
-    const renderCarouselItem = ({item, index}: {item: string, index: number}) => (
-        <View>
-            <Image
-                source={{uri: item}}
-                style={StallStyle.carouselImage}
-                resizeMode="contain"
-            />
-        </View>
-    );
     
     if (loading) {
         return (
@@ -310,7 +301,7 @@ const StallInfo = () => {
                         backgroundColor: 'gray',
                         opacity: 0.9,
                         justifyContent:'center',
-                        alignItems:'center'
+                        alignItems:'center',
                     }}>
                         <TouchableOpacity
                             onPress={() => setModalVisible(false)}

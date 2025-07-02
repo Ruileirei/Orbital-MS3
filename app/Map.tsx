@@ -28,7 +28,7 @@ const SINGAPORE_MAP: Region = {
     longitudeDelta: 0.1,
 };
 
-const MapScreen: React.FC = () => {
+const MapScreen = () => {
     const [stalls, setStalls] = useState<Stall[]>([]);
     const [loading, setLoading] = useState(true);
     const [filterStalls, setFilterStalls] = useState<Stall[]>([]);
@@ -97,7 +97,7 @@ const MapScreen: React.FC = () => {
             }, 1000);
             const nearby = stalls.filter(stall=> {
                 const dist = getDistance(centerLat, centerLong, stall.latitude, stall.longitude);
-                return dist <= 2;
+                return dist <= 3;
             });
             setFilterStalls(nearby);
         } else if (mode ==='all') {
@@ -114,7 +114,7 @@ const MapScreen: React.FC = () => {
 
             const nearby = stalls.filter(stall => {
                 const dist = getDistance(userLocation.latitude, userLocation.longitude, stall.latitude, stall.longitude);
-                return dist <= 2;
+                return dist <= 3;
             });
             setFilterStalls(nearby);
         }

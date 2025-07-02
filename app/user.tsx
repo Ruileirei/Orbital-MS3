@@ -11,7 +11,6 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const userPage = () => {
     const router = useRouter();
-
     const [userData, setUserdata] = useState({
         name: "Default User",
         email: "Default@gmail.com",
