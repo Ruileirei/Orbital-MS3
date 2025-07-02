@@ -19,6 +19,8 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
       ]
     },
@@ -49,6 +51,12 @@
         "projectId": "42354216-d084-4f0c-94e1-ce76398ce231"
       }
     },
-    "owner": "reiruilei"
+    "owner": "reiruilei",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/42354216-d084-4f0c-94e1-ce76398ce231"
+    }
   }
 }

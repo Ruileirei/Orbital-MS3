@@ -17,8 +17,6 @@ interface Stall {
   cuisine: string;
   rating: number;
   openingHours: { [key: string]: string[] };
-  latitude: number;
-  longitude: number;
 }
 
 
@@ -81,9 +79,6 @@ const SearchScreen = () => {
       pathname: '/stall/[id]',
       params: {
         id: stall.id,
-        title: stall.title,
-        cuisine: stall.cuisine,
-        rating: stall.rating.toString(),
       },
     });
   };

@@ -22,8 +22,6 @@ export type Stall = {
   };
 };
 
-
-
 const pickStall = (stalls: any[]) => {
     if (!stalls.length) return null;
     const today = new Date().getDate();
@@ -139,9 +137,7 @@ const MainPage = () => {
                                     pathname: '/stall/[id]',
                                     params: {
                                         id: stall.id,
-                                        title: stall.name,
-                                        cuisine: stall.cuisine,
-                                        rating: stall.rating?.toString() || '0',
+                                    
                                     },
                                 })}
                                 style={mainStyle.openStallsIndividualContainer}
