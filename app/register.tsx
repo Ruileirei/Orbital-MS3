@@ -1,5 +1,5 @@
 import { registerUser, saveUserData } from "@/services/firebaseRegisterService";
-import RegisterStyle from "@/src/Components/RegisterStyle";
+import RegisterStyle from "@/src/styles/RegisterStyle";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Image, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";

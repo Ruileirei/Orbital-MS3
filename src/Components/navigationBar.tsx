@@ -2,7 +2,7 @@ import { usePathname, useRouter } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import NavBarStyle from "./NavBarStyle";
+import NavBarStyle from "../styles/NavBarStyle";
 
 const BotNavBar = ({shiftUp = false}) => {
     const router = useRouter();

@@ -1,5 +1,5 @@
 import { signIn } from "@/services/firebaseAuthService";
-import LoginStyles from "@/src/Components/LoginPageStyle";
+import LoginStyles from "@/src/styles/LoginPageStyle";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";

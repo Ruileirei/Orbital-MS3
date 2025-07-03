@@ -1,6 +1,6 @@
 import { db } from "@/firebase/firebaseConfig";
 import FilterDropdown from "@/src/Components/filterDropDown";
-import filterStyle from "@/src/Components/filterStyle";
+import filterStyle from "@/src/styles/filterStyle";
 import { Button } from "@rneui/themed";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { collection, getDocs } from "firebase/firestore";

@@ -1,7 +1,7 @@
 import { auth } from "@/firebase/firebaseConfig";
 import { arrayRemove, arrayUnion, getStallDoc, getUserDoc, updateUserDoc } from "@/services/firestoreService";
-import StallStyle from "@/src/Components/StallPageStyle";
 import StarRating from "@/src/Components/starRating";
+import StallStyle from "@/src/styles/StallPageStyle";
 import { formatTime } from "@/src/utils/formatTime";
 import { getOpenStatus, OpenStatus } from '@/src/utils/isOpenStatus';
 import { MaterialCommunityIcons } from "@expo/vector-icons";

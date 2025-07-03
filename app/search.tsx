@@ -1,7 +1,8 @@
 import BotNavBar from '@/src/Components/navigationBar';
-import SearchStyle from '@/src/Components/SearchStyle';
 import StallItem from '@/src/Components/StallItem';
 import { useStalls } from '@/src/hooks/useStalls';
+import SearchStyle from '@/src/styles/SearchStyle';
+import { Stall } from '@/src/types/Stall';
 import { getOpenStatus } from '@/src/utils/isOpenStatus';
 import { Icon } from '@rneui/themed';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -10,15 +11,6 @@ import { ActivityIndicator, FlatList, Text, TextInput, TouchableOpacity, View } 
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 const pageSize = 10;
-
-interface Stall {
-  id: string;
-  title: string;
-  cuisine: string;
-  rating: number;
-  openingHours: { [key: string]: string[] };
-}
-
 
 const SearchScreen = () => {
   const router = useRouter();
@@ -74,11 +66,11 @@ const SearchScreen = () => {
     router.push(`/filter?cuisine=${encodeURIComponent(selectedCuisine.join(','))}${hideClosedParam}${sortByParam}`);
   };
 
-  const navigateStall = (stall: Stall) => {
+  const navigateStall = (stall: Stall["id"]) => {
     router.push({
       pathname: '/stall/[id]',
       params: {
-        id: stall.id,
+        id: stall,
       },
     });
   };
@@ -159,7 +151,7 @@ const SearchScreen = () => {
           </View>
           <FlatList
             data={filteredStalls}
-            renderItem={({ item }) => <StallItem item={item} onPress={() => navigateStall(item)} />}
+            renderItem={({ item }) => <StallItem item={item} onPress={() => navigateStall(item.id)} />}
             keyExtractor={(item) => item.id}
             ListEmptyComponent={() => (
               <Text style={{ textAlign: 'center', marginTop: 20 }}>No match found</Text>

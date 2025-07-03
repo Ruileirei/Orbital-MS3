@@ -1,9 +1,10 @@
 import { auth } from '@/firebase/firebaseConfig';
 import { fetchAllStalls, fetchUserData } from "@/services/firestoreService";
 import CategoryList from '@/src/Components/CategoryList';
-import mainStyle from '@/src/Components/mainStyle';
 import BotNavBar from '@/src/Components/navigationBar';
 import StarRating from '@/src/Components/starRating';
+import mainStyle from '@/src/styles/mainStyle';
+import { Stall } from '@/src/types/Stall';
 import { getOpenStatus } from '@/src/utils/isOpenStatus';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -11,16 +12,6 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export type Stall = {
-  id: string;
-  name?: string;
-  title?: string;
-  cuisine?: string;
-  rating?: number;
-  openingHours?: {
-    [key: string]: string[];
-  };
-};
 
 const pickStall = (stalls: any[]) => {
     if (!stalls.length) return null;
@@ -142,7 +133,7 @@ const MainPage = () => {
                                 })}
                                 style={mainStyle.openStallsIndividualContainer}
                             >
-                                <Text style={{ fontSize: 15, fontWeight: '500' }}>{stall.name || stall.title}</Text>
+                                <Text style={{ fontSize: 15, fontWeight: '500' }}>{stall.name}</Text>
                                 <Text style={{ fontSize: 12, color: 'gray' }}>{stall.cuisine}</Text>
                             </TouchableOpacity>
                         ))}

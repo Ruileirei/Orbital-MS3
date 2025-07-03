@@ -1,6 +1,6 @@
 import { auth, db } from "@/firebase/firebaseConfig";
 import BotNavBar from "@/src/Components/navigationBar";
-import userStyle from "@/src/Components/userStyle";
+import userStyle from "@/src/styles/userStyle";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
