@@ -1,4 +1,4 @@
-import mainStyle from '@/src/Components/mainStyle';
+import mainStyle from '@/src/styles/mainStyle';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';

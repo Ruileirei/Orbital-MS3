@@ -8,7 +8,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import SearchStyle from "../src/Components/SearchStyle";
+import SearchStyle from "../src/styles/SearchStyle";
 
 interface Stall {
     id: string;

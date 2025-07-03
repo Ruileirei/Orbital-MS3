@@ -1,4 +1,4 @@
-import mapOptionsStyle from "@/src/Components/mapSearchStyle";
+import mapOptionsStyle from "@/src/styles/mapSearchStyle";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
