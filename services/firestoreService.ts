@@ -1,7 +1,7 @@
 import { db } from "@/firebase/firebaseConfig";
 import type { DocumentData, DocumentSnapshot, QueryDocumentSnapshot } from 'firebase/firestore';
 
-import type { Stall } from "@/app/main";
+import type { Stall } from "@/src/types/Stall";
 
 export function getStallDoc(id: string): Promise<DocumentSnapshot<DocumentData>> {
   const { doc, getDoc } = require("firebase/firestore");
@@ -11,6 +11,16 @@ export function getStallDoc(id: string): Promise<DocumentSnapshot<DocumentData>>
 export function getUserDoc(uid: string): Promise<DocumentSnapshot<DocumentData>> {
   const { doc, getDoc } = require("firebase/firestore");
   return getDoc(doc(db, "users", uid));
+}
+
+export function getStallReviewDoc(id: string): Promise<DocumentSnapshot<DocumentData>> {
+  const { doc, getDoc } = require("firebase/firestore");
+  return getDoc(doc(db, "stalls", id, "reviews"));
+}
+
+export function getUserReviewDoc(uid: string): Promise<DocumentSnapshot<DocumentData>> {
+  const { doc, getDoc } = require("firebase/firestore");
+  return getDoc(doc(db, "users", uid, "reviews"));
 }
 
 export function updateUserDoc(uid: string, data: any): Promise<void> {
