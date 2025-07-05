@@ -5,8 +5,8 @@ const RegisterStyle = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f0f2f5',
         justifyContent: 'flex-start',
-        paddingTop: 40,
-        paddingHorizontal: 60,
+        paddingTop: -10,
+        paddingHorizontal: 0,
     },
 
     foodfindrLogo: {
@@ -18,12 +18,13 @@ const RegisterStyle = StyleSheet.create({
 
     registerBox: {
         justifyContent: 'flex-start',
-        backgroundColor: '#FDF1E7',
+        backgroundColor: '#fff',
         padding: 32,
         borderRadius: 12,
         width: '100%',
-        elevation: 5,
-        shadowColor: '#000',
+        paddingHorizontal: 24,
+        elevation: 5, 
+        shadowColor: '#000', 
         shadowOpacity: 0.1,
         shadowRadius: 10,
         shadowOffset: { width: 0, height: 4 },

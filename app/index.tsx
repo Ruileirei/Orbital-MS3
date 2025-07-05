@@ -1,10 +1,10 @@
 import { signIn } from "@/services/firebaseAuthService";
 import LoginStyles from "@/src/styles/LoginPageStyle";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ScrollView, StatusBar, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 const LoginScreen = () => {
     const router = useRouter();
     const [email, setEmail] = useState("");
@@ -52,15 +52,18 @@ const LoginScreen = () => {
     };
 
     return (
-        <LinearGradient
-          colors={['#ffb933', '#ff7733']}
-          style={LoginStyles.background}
-        >
-          <SafeAreaView>
-            <ScrollView 
-              contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start', paddingBottom: 50, paddingTop: 120, alignItems: 'center' }}
-              keyboardShouldPersistTaps="handled"
-            >
+        <SafeAreaView style={LoginStyles.background} edges={['left', 'right', 'bottom']} >
+          <StatusBar translucent backgroundColor="transparent"/>
+          <ScrollView 
+            contentContainerStyle={{ flexGrow: 1, backgroundColor: '#f0f2f5'}}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Image
+              source={require('../assets/images/storeShutter.png')}
+              style={{width: '101%', height: 110}}
+              resizeMode="cover"
+            />
+            <View style={{paddingBottom: 50, paddingTop: 120, alignItems: 'center', paddingHorizontal: 60, }}>
               <Image source={require('../assets/images/FoodFindrLogoRMBG.png')} 
                     style={LoginStyles.foodfindrLogo}
                     resizeMode="contain"
@@ -93,20 +96,17 @@ const LoginScreen = () => {
                   </TouchableOpacity>
 
                 </View>
-                
 
               </View>
-
-
-              <View style={LoginStyles.bottomRegister}>
+            </View>
+          </ScrollView>
+          <View style={LoginStyles.bottomRegister}>
                 <Text style={LoginStyles.registerText}>Don't have an account? </Text>
                 <TouchableOpacity onPress={checkRegister}>
                   <Text style={LoginStyles.link}>Register</Text>
                 </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </SafeAreaView>
-        </LinearGradient>
+            </View>
+        </SafeAreaView>
   );
 };
 

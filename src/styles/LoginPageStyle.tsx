@@ -5,8 +5,8 @@ const LoginStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f2f5',
     justifyContent: 'flex-start',
-    paddingTop: 40,
-    paddingHorizontal: 60,
+    paddingTop: -10,
+    paddingHorizontal: 0,
   },
 
   foodfindrLogo: {
@@ -18,7 +18,7 @@ const LoginStyles = StyleSheet.create({
 
   loginBox: {
     justifyContent: 'flex-start',
-    backgroundColor: '#FDF1E7',
+    backgroundColor: '#fff',
     padding: 32,
     borderRadius: 12,
     width: '100%',
