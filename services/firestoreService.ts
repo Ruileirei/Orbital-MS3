@@ -2,6 +2,7 @@ import { db } from "@/firebase/firebaseConfig";
 import type { DocumentData, DocumentSnapshot, QueryDocumentSnapshot } from 'firebase/firestore';
 
 import type { Stall } from "@/src/types/Stall";
+import type { Review } from "@/src/types/reviewItem";
 
 export function getStallDoc(id: string): Promise<DocumentSnapshot<DocumentData>> {
   const { doc, getDoc } = require("firebase/firestore");
@@ -13,14 +14,29 @@ export function getUserDoc(uid: string): Promise<DocumentSnapshot<DocumentData>>
   return getDoc(doc(db, "users", uid));
 }
 
-export function getStallReviewDoc(id: string): Promise<DocumentSnapshot<DocumentData>> {
-  const { doc, getDoc } = require("firebase/firestore");
-  return getDoc(doc(db, "stalls", id, "reviews"));
+export async function getStallReviewDoc(id: string): Promise<Review[]> {
+  const { doc, getDoc, collection, query, orderBy } = require("firebase/firestore");
+  const reviewsRef = query(collection(db, "stalls", id, "reviews"), orderBy("timestamp", "desc"));
+  const snapshot = getDoc(reviewsRef);
+  const reviews = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+    id: doc.id,
+    ...doc.data(),
+
+  })) as Review[];
+  return reviews;
 }
 
-export function getUserReviewDoc(uid: string): Promise<DocumentSnapshot<DocumentData>> {
-  const { doc, getDoc } = require("firebase/firestore");
-  return getDoc(doc(db, "users", uid, "reviews"));
+export async function getUserReviewDoc(uid: string): Promise<Review[]> {
+  const { doc, getDoc, collection, query, orderBy } = require("firebase/firestore");
+  const reviewsRef = query(collection(db, "users", uid, "reviews"), orderBy("timestamp", "desc"));
+  const snapshot = getDoc(reviewsRef);
+  const reviews = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+    id: doc.id,
+    ...doc.data(),
+
+  })) as Review[];
+  return reviews;
+  
 }
 
 export function updateUserDoc(uid: string, data: any): Promise<void> {

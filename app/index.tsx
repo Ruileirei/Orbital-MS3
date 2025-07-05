@@ -1,10 +1,10 @@
 import { signIn } from "@/services/firebaseAuthService";
 import LoginStyles from "@/src/styles/LoginPageStyle";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 const LoginScreen = () => {
     const router = useRouter();
     const [email, setEmail] = useState("");
@@ -52,56 +52,61 @@ const LoginScreen = () => {
     };
 
     return (
-        <SafeAreaView style={LoginStyles.background}>
-          <ScrollView 
-            contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start', paddingBottom: 50, paddingTop: 120, alignItems: 'center' }}
-            keyboardShouldPersistTaps="handled"
-          >
-            <Image source={require('../assets/images/FoodFindrLogoRMBG.png')} 
-                  style={LoginStyles.foodfindrLogo}
-                  resizeMode="contain"
-            />
-
-            <View style={LoginStyles.loginBox}>
-
-              <TextInput
-                style={LoginStyles.input}
-                placeholder="Email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
+        <LinearGradient
+          colors={['#ffb933', '#ff7733']}
+          style={LoginStyles.background}
+        >
+          <SafeAreaView>
+            <ScrollView 
+              contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start', paddingBottom: 50, paddingTop: 120, alignItems: 'center' }}
+              keyboardShouldPersistTaps="handled"
+            >
+              <Image source={require('../assets/images/FoodFindrLogoRMBG.png')} 
+                    style={LoginStyles.foodfindrLogo}
+                    resizeMode="contain"
               />
-              <TextInput
-                style={LoginStyles.input}
-                placeholder="Password"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-              />
-              <TouchableOpacity onPress={() => router.push('/forgetPW')}>
-                <Text style={{color: '#007aff', marginLeft: 4, marginTop: -5, marginBottom: -5}}>Forgot Password?</Text>
-              </TouchableOpacity>
 
-              <View style={LoginStyles.buttonContainer}>
-                <TouchableOpacity style={LoginStyles.button} onPress={checkLogin} disabled={loading}>
-                  <Text style={LoginStyles.buttonText}>Login</Text>
+              <View style={LoginStyles.loginBox}>
+
+                <TextInput
+                  style={LoginStyles.input}
+                  placeholder="Email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+                <TextInput
+                  style={LoginStyles.input}
+                  placeholder="Password"
+                  secureTextEntry
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity onPress={() => router.push('/forgetPW')}>
+                  <Text style={{color: '#007aff', marginLeft: 4, marginTop: -5, marginBottom: -5}}>Forgot Password?</Text>
                 </TouchableOpacity>
 
+                <View style={LoginStyles.buttonContainer}>
+                  <TouchableOpacity style={LoginStyles.button} onPress={checkLogin} disabled={loading}>
+                    <Text style={LoginStyles.buttonText}>Login</Text>
+                  </TouchableOpacity>
+
+                </View>
+                
+
               </View>
-              
-
-            </View>
 
 
-            <View style={LoginStyles.bottomRegister}>
-              <Text style={LoginStyles.registerText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={checkRegister}>
-                <Text style={LoginStyles.link}>Register</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </SafeAreaView>
+              <View style={LoginStyles.bottomRegister}>
+                <Text style={LoginStyles.registerText}>Don't have an account? </Text>
+                <TouchableOpacity onPress={checkRegister}>
+                  <Text style={LoginStyles.link}>Register</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </SafeAreaView>
+        </LinearGradient>
   );
 };
 

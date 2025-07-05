@@ -62,7 +62,6 @@ export async function updateStallRating(reviewData: Review): Promise<any | null>
                 rating: newRating,
                 numberOfReviews: numOfReviews + 1,
             });
-            
         /*
         } else {
             console.error("Error fetching stall data", error);

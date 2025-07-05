@@ -4,7 +4,6 @@ export interface Review {
     stallID: string;
     text: string;
     rating: number;
-    timestamp: string; //ISO string
 }
 
 /* 

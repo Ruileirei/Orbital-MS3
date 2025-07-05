@@ -18,7 +18,7 @@ const LoginStyles = StyleSheet.create({
 
   loginBox: {
     justifyContent: 'flex-start',
-    backgroundColor: '#fff',
+    backgroundColor: '#FDF1E7',
     padding: 32,
     borderRadius: 12,
     width: '100%',

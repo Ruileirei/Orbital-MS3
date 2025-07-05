@@ -1,9 +1,9 @@
 import { registerUser, saveUserData } from "@/services/firebaseRegisterService";
 import RegisterStyle from "@/src/styles/RegisterStyle";
+import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Image, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
-
 
 const Register = () => {
     const router = useRouter();
@@ -69,61 +69,66 @@ const Register = () => {
    
 
     return (
-        <SafeAreaView style={RegisterStyle.background}>
-            <ScrollView
-                contentContainerStyle={{
-                    flexGrow: 1,
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                    paddingTop: 120,
-                    paddingBottom: 50,
-                }}
-                keyboardShouldPersistTaps='handled'
-            >
-                <Image source={require('../assets/images/FoodFindrLogoRMBG.png')} 
-                    style={RegisterStyle.foodfindrLogo}
-                    resizeMode='contain'
-                />
-
-                <View style={RegisterStyle.registerBox}>
-                    <TextInput 
-                        style={RegisterStyle.input}
-                        placeholder="Username"
-                        value={username} 
-                        onChangeText={setUsername} 
-                        autoCapitalize="none"
+        <LinearGradient
+          colors={['#ffb933', '#ff7733']}
+          style={RegisterStyle.background}
+        >
+            <SafeAreaView>
+                <ScrollView
+                    contentContainerStyle={{
+                        flexGrow: 1,
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        paddingTop: 120,
+                        paddingBottom: 50,
+                    }}
+                    keyboardShouldPersistTaps='handled'
+                >
+                    <Image source={require('../assets/images/FoodFindrLogoRMBG.png')} 
+                        style={RegisterStyle.foodfindrLogo}
+                        resizeMode='contain'
                     />
 
-                    <TextInput 
-                        placeholder="Email" 
-                        style={RegisterStyle.input} 
-                        value={email} 
-                        onChangeText={setEmail} 
-                        keyboardType="email-address" 
-                        autoCapitalize="none"
-                    />
+                    <View style={RegisterStyle.registerBox}>
+                        <TextInput 
+                            style={RegisterStyle.input}
+                            placeholder="Username"
+                            value={username} 
+                            onChangeText={setUsername} 
+                            autoCapitalize="none"
+                        />
 
-                    <TextInput 
-                        placeholder="Password" 
-                        style={RegisterStyle.input} 
-                        value={password} 
-                        onChangeText={setPassword} 
-                        secureTextEntry
-                    />
+                        <TextInput 
+                            placeholder="Email" 
+                            style={RegisterStyle.input} 
+                            value={email} 
+                            onChangeText={setEmail} 
+                            keyboardType="email-address" 
+                            autoCapitalize="none"
+                        />
 
-                    <View style={RegisterStyle.buttonContainer}>
+                        <TextInput 
+                            placeholder="Password" 
+                            style={RegisterStyle.input} 
+                            value={password} 
+                            onChangeText={setPassword} 
+                            secureTextEntry
+                        />
 
-                        <TouchableOpacity 
-                            style={RegisterStyle.button} 
-                            onPress={handleRegister} 
-                            disabled={loading}
-                        >
-                            <Text style={RegisterStyle.buttonText}>Register</Text>
-                        </TouchableOpacity>
+                        <View style={RegisterStyle.buttonContainer}>
+
+                            <TouchableOpacity 
+                                style={RegisterStyle.button} 
+                                onPress={handleRegister} 
+                                disabled={loading}
+                            >
+                                <Text style={RegisterStyle.buttonText}>Register</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-           </ScrollView>     
-        </SafeAreaView>
+                </ScrollView>     
+            </SafeAreaView>
+        </LinearGradient>
     );
 };
 
