@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
@@ -18,52 +18,48 @@ const userPage = () => {
         favourites: [] as string[],
     });
     const [favStall, setFavStall] = useState<{id: string; name: string; cuisine: string}[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchUserData = async () => {
+        const fetchAllData = async () => {
             try {
-                const docRef = doc(db, "users", auth.currentUser?.uid ?? "");
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    setUserdata({
-                        name: data.username || "Default User",
-                        email: data.email || "Default@gmail.com",
-                        avatar: data.avatar || userData.avatar,
-                        favourites: data.favourites || [],
+            // Fetch user
+            const userRef = doc(db, "users", auth.currentUser?.uid ?? "");
+            const userSnap = await getDoc(userRef);
+            let favourites: string[] = [];
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+                setUserdata({
+                name: data.username || "Default User",
+                email: data.email || "Default@gmail.com",
+                avatar: data.pfp || userData.avatar,
+                favourites: data.favourites || [],
+                });
+                favourites = data.favourites || [];
+            }
+
+            // Fetch stalls
+            const stalls: { id: string; name: string; cuisine: string }[] = [];
+            for (const stallId of favourites) {
+                try {
+                const stallRef = doc(db, 'stalls', stallId);
+                const stallSnap = await getDoc(stallRef);
+                if (stallSnap.exists()) {
+                    const stallData = stallSnap.data();
+                    stalls.push({
+                    id: stallId,
+                    name: stallData.name || "Unnamed stall",
+                    cuisine: stallData.cuisine || ""
+                    });
+                } else {
+                    stalls.push({
+                    id: stallId,
+                    name: "Unknown stall",
+                    cuisine: "-"
                     });
                 }
-            } catch (error) {
-                console.error("Failed to fetch user data,", error);
-            }
-        };
-        fetchUserData();
-    }, []);
-
-    useEffect(() => {
-        const fetchFavourite = async () => {
-            const stalls: {id: string; name: string; cuisine: string}[] = [];
-
-            for (const stallId of userData.favourites) {
-                try {
-                    const stallRef = doc(db, 'stalls', stallId);
-                    const stallSnap = await getDoc(stallRef);
-                    if (stallSnap.exists()) {
-                        const stallData = stallSnap.data();
-                        stalls.push ({
-                        id: stallId,
-                        name: stallData.name || "Unnamed stall",
-                        cuisine: stallData.cuisine || ""
-                        });
-                    } else {
-                        stalls.push({
-                            id: stallId,
-                            name: "Unknown stall",
-                            cuisine: "-"
-                        });
-                    }
                 } catch (error) {
-                    console.error(`Failed to fetch stall ${stallId}:`, error);
+                console.error(`Failed to fetch stall ${stallId}:`, error);
                     stalls.push({
                         id: stallId,
                         name: "Error loading stall",
@@ -72,13 +68,15 @@ const userPage = () => {
                 }
             }
             setFavStall(stalls);
+            } catch (error) {
+                console.error("Failed to load data", error);
+            } finally {
+                setLoading(false);
+            }
         };
-        if (userData.favourites.length > 0) {
-            fetchFavourite();
-        } else {
-            setFavStall([]);
-        }
-    }, [userData.favourites]);
+        fetchAllData();
+    }, []);
+
 
     const handleLogout = () => {
         Alert.alert(
@@ -94,6 +92,17 @@ const userPage = () => {
             },]
         );
     };
+
+    if (loading) {
+        return (
+            <SafeAreaProvider>
+                <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+                    <Text style={{ marginBottom: 12 }}>Loading your profile...</Text>
+                    <ActivityIndicator size="large" color="#ffb933" />
+                </SafeAreaView>
+            </SafeAreaProvider>
+        );
+    }
 
     return (
         <SafeAreaProvider>
