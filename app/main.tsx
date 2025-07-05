@@ -26,7 +26,6 @@ const MainPage = () => {
     const [stallOfTheDay, setStallOfTheDay] = useState<any>(null);
     const [openStalls, setOpenStalls] = useState<Stall[]>([]);
     const [loading, setLoading] = useState(true);
-
     useEffect(() => {
         const fetchAll = async () => {
             try {
