@@ -14,6 +14,7 @@ export async function fetchAllStallsFromFirestore() {
       openingHours: data.openingHours ?? {},
       latitude: data.latitude ?? 0,
       longitude: data.longitude ?? 0,
+      menu: data.menu ?? [],
     };
   });
 }

@@ -9,6 +9,7 @@ interface Stall {
   openingHours: { [key: string]: string[] };
   latitude: number;
   longitude: number;
+  menu: string[];
 }
 
 export function useStalls() {

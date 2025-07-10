@@ -1,4 +1,5 @@
 import { db } from "@/firebase/firebaseConfig";
+import { Icon } from "@rneui/themed";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useState } from "react";
@@ -12,11 +13,13 @@ const GroupPage = () => {
     const [groupName, setGroupName] = useState("");
     const [stallIds, setStallIds] = useState<string[]>([]);
     const [stalls, setStalls] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [grpLoading, setGrpLoading] = useState(true);
+    const [stallLoading, setStallLoading] = useState(true);
 
     useEffect(() => {
         const fetchGroup = async () => {
             if (!id || typeof id !== "string") return;
+            setGrpLoading(true);
             try {
             const groupRef = doc(db, "stallGroups", id);
             const groupSnap = await getDoc(groupRef);
@@ -28,7 +31,9 @@ const GroupPage = () => {
                 console.warn("No such group");
             }
             } catch (error) {
-            console.error("Error fetching group:", error);
+                console.error("Error fetching group:", error);
+            } finally {
+                setGrpLoading(false);
             }
         };
         fetchGroup();
@@ -42,9 +47,10 @@ const GroupPage = () => {
 
     useEffect(() => {
         const fetchStalls = async () => {
+            setStallLoading(true);
             if (stallIds.length === 0) {
                 setStalls([]);
-                setLoading(false);
+                setStallLoading(false);
                 return;
             }
             try {
@@ -58,7 +64,7 @@ const GroupPage = () => {
             } catch (err) {
                 console.error("Failed to load stalls:", err);
             } finally {
-                setLoading(false);
+                setStallLoading(false);
             }
         };
         fetchStalls();
@@ -91,9 +97,29 @@ const GroupPage = () => {
     );
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#fff"}}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#fff"}} edges={['left', 'right', 'bottom']}>
+             <View style={{ position: 'relative' }}>
+                <Image
+                    source={require('../../assets/images/storeShutter.png')}
+                    style={{ width: '101%', height: 110 }}
+                    resizeMode="cover"
+                />
 
-            {loading ? (
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    style={{
+                    position: 'absolute',
+                    top: 40,
+                    left: 20,
+                    backgroundColor: 'rgba(243, 18, 18, 0.4)',
+                    padding: 8,
+                    borderRadius: 20
+                    }}
+                >
+                    <Icon name="arrow-left" type="font-awesome" color="white" size={20} />
+                </TouchableOpacity>
+            </View>
+            {grpLoading || stallLoading ? (
                         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                             <Text style={{ marginTop: 12, color: 'gray' }}>Loading group stalls...</Text>
                             <ActivityIndicator size="large" color="#ffb933" />

@@ -17,5 +17,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "app/index.js", "firebase/serviceAccountKey/geoHashing.js", "firebase/serviceAccountKey/addStallsToGroup.js"  ]
+, "app/index.js", "firebase/serviceAccountKey/geoHashing.js", "firebase/serviceAccountKey/addStallsToGroup.js", "firebase/serviceAccountKey/migrateImages.js"  ]
 }

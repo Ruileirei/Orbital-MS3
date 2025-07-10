@@ -74,7 +74,11 @@ const StallItem: React.FC<StallItemProps> = ({ item }) => {
             alignItems: 'center',
         }}>
             <Image
-                source={{ uri: item.menu?.[0] || "https://png.pngtree.com/png-vector/20221109/ourmid/pngtree-no-image-available-icon-flatvector-illustration-graphic-available-coming-vector-png-image_40958834.jpg" }}
+                source={{
+                    uri: item.menu && item.menu.length > 0
+                    ? item.menu[0]
+                    : "https://png.pngtree.com/png-vector/20221109/ourmid/pngtree-no-image-available-icon-flatvector-illustration-graphic-available-coming-vector-png-image_40958834.jpg",
+                }}
                 style={{ width: 60, height: 60, borderRadius: 8, marginRight: 12 }}
             />
             <View style={{ flex: 1 }}>

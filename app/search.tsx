@@ -49,6 +49,14 @@ const SearchScreen = () => {
       result = [...result].sort((a, b) => a.rating - b.rating);
     }
 
+    result = [...result].sort((a, b) => {
+      const aStatus = getOpenStatus(a.openingHours ?? {});
+      const bStatus = getOpenStatus(b.openingHours ?? {});
+      if (aStatus === 'OPEN' && bStatus !== 'OPEN') return -1;
+      if (aStatus !== 'OPEN' && bStatus === 'OPEN') return 1;
+      return 0;
+    });
+
     return result;
   }, [allStalls, selectedCuisine.join(','), hideClosed, sortBy, searchValue]);
 

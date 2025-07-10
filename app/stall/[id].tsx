@@ -6,7 +6,7 @@ import { formatTime } from "@/src/utils/formatTime";
 import { getOpenStatus, OpenStatus } from '@/src/utils/isOpenStatus';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Icon } from "@rneui/themed";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { ActivityIndicator, Dimensions, FlatList, Image, Modal, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -15,6 +15,7 @@ import Toast from "react-native-toast-message";
 const {width: screenWidth} = Dimensions.get('window');
 
 const StallInfo = () => {
+    const router = useRouter();
     const DAY_LABEL_WIDTH = "22%";
     const dayOrder = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const currentDayIndex = new Date().getDay();
@@ -71,11 +72,16 @@ const StallInfo = () => {
                 await updateUserDoc(auth.currentUser.uid, {
                     favourites: arrayRemove(id),
                 });
+                setIsSaved(false);
+                Toast.show({
+                    type: 'info',
+                    text1: 'Removed from favourites',
+                    text2: `${stallData?.name ?? title} was removed!`,
+                });
             } else {
                 await updateUserDoc(auth.currentUser.uid, {
                     favourites: arrayUnion(id),
                 });
-
                 setIsSaved(true);
                 Toast.show({
                     type: 'success',
@@ -102,7 +108,6 @@ const StallInfo = () => {
             }
             try {
                 const docRes = await getStallDoc(id.toString());
-
                 if (docRes.exists()) {
                     setStallData(docRes.data() as any);
                 } else {
@@ -116,7 +121,7 @@ const StallInfo = () => {
                 setLoading(false);
             }
         }
-        fetchStall();
+        fetchStall();  
     }, [id]);
 
     useEffect(() => {
@@ -166,6 +171,31 @@ const StallInfo = () => {
 
     return (
         <View style={StallStyle.container}>
+
+            <View style={{ position: 'relative' }}>
+                <Image
+                    source={require('../../assets/images/storeShutter.png')}
+                    style={{ width: '101%', height: 110 }}
+                    resizeMode="cover"
+                />
+
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    style={{
+                    position: 'absolute',
+                    top: 40,
+                    left: 20,
+                    backgroundColor: 'rgba(243, 18, 18, 0.4)',
+                    padding: 8,
+                    borderRadius: 20
+                    }}
+                >
+                    <Icon name="arrow-left" type="font-awesome" color="white" size={20} />
+                </TouchableOpacity>
+            </View>
+
+
+            <View style={{padding: 20}}>
             <TouchableOpacity onPress={handleFavourite} style={StallStyle.saveIcon}>
                 <Icon 
                     name={isSaved ? 'heart' : 'heart-o'}
@@ -340,6 +370,7 @@ const StallInfo = () => {
                     </View>
                 </Modal>
             )}
+        </View>
         </View>
     );
 };
