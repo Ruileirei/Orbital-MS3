@@ -148,6 +148,59 @@ describe('SearchScreen', () => {
 
     expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/filter?'));
   });
+
+  it('renders pagination controls when many stalls exist', () => {
+    const manyStalls = Array.from({ length: 25 }, (_, i) => ({
+      id: `stall-${i}`,
+      title: `Mock Stall ${i}`,
+      cuisine: 'Chinese',
+      rating: 4.5,
+      openingHours: {},
+      latitude: 0,
+      longitude: 0,
+    }));
+
+    (useStalls as jest.Mock).mockReturnValue({
+      stalls: manyStalls,
+      loading: false,
+      error: null,
+    });
+    render(<SearchScreen />);
+    expect(screen.getByText('Prev')).toBeTruthy();
+    expect(screen.getByText('Next')).toBeTruthy();
+  });
+
+  it('navigates to stall detail when stall is pressed', () => {
+    (useStalls as jest.Mock).mockReturnValue({
+      stalls: [
+        {
+          id: 'stall-1',
+          title: 'Mock Stall 1',
+          cuisine: 'Chinese',
+          rating: 4.5,
+          openingHours: {},
+          latitude: 0,
+          longitude: 0,
+        },
+      ],
+      loading: false,
+      error: null,
+    });
+
+    render(<SearchScreen />);
+
+    fireEvent.press(screen.getByTestId('stall-item-stall-1'));
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/stall/[id]',
+      params: {
+        id: 'stall-1',
+        title: 'Mock Stall 1',
+        cuisine: 'Chinese',
+        rating: '4.5',
+      },
+    });
+  });
 });
 
 

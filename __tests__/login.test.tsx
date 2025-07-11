@@ -9,11 +9,14 @@ jest.mock('expo-router', () => ({
 
 describe('LoginScreen', () => {
   const mockReplace = jest.fn();
-
+  const mockPush = jest.fn();
   beforeEach(() => {
+    mockReplace.mockClear();
+    mockPush.mockClear();
+
     (useRouter as jest.Mock).mockReturnValue({
       replace: mockReplace,
-      push: jest.fn(),
+      push: mockPush,
     });
   });
 
@@ -37,6 +40,18 @@ describe('LoginScreen', () => {
   it('shows alert if fields are empty', () => {
     const { getByText } = render(<LoginScreen />);
     fireEvent.press(getByText('Login'));
-    // You can optionally check for Alert.alert mock here
   });
+
+  it('navigates to forgot password page when pressed', () => {
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText('Forgot Password?'));
+    expect(mockPush).toHaveBeenCalledWith('/forgetPW');
+  });
+
+  it('navigates to register page when Register is pressed', () => {
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText('Register'));
+    expect(mockReplace).toHaveBeenCalledWith('/register');
+  });
+
 });

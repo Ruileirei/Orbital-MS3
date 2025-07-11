@@ -115,6 +115,7 @@ const GroupPage = () => {
                     padding: 8,
                     borderRadius: 20
                     }}
+                    testID="back-button"
                 >
                     <Icon name="arrow-left" type="font-awesome" color="white" size={20} />
                 </TouchableOpacity>

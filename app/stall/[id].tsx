@@ -189,6 +189,7 @@ const StallInfo = () => {
                     padding: 8,
                     borderRadius: 20
                     }}
+                    testID="back-button"
                 >
                     <Icon name="arrow-left" type="font-awesome" color="white" size={20} />
                 </TouchableOpacity>
@@ -196,12 +197,13 @@ const StallInfo = () => {
 
 
             <View style={{padding: 20}}>
-            <TouchableOpacity onPress={handleFavourite} style={StallStyle.saveIcon}>
+            <TouchableOpacity onPress={handleFavourite} style={StallStyle.saveIcon} testID="favourite-button">
                 <Icon 
                     name={isSaved ? 'heart' : 'heart-o'}
                     type='font-awesome'
                     size={24}
                     color={isSaved ? 'red' : 'gray'}
+                    testID="heart-icon"
                 />
             </TouchableOpacity>
             <Text style={StallStyle.title}>{stallData.name ?? title}</Text>
@@ -308,6 +310,7 @@ const StallInfo = () => {
                             setSelectedImage(item);
                             setModalVisible(true);
                         }}
+                        testID="menu-image-button"
                     >
                         <Image
                             source={{uri: item}}
@@ -325,7 +328,7 @@ const StallInfo = () => {
                 contentContainerStyle={{paddingHorizontal: 20}}
             />
             {selectedImage && (
-                <Modal visible={isModalVisible} transparent={true}>
+                <Modal visible={isModalVisible} transparent={true} testID="image-modal">
                     <View style={{
                         flex: 1,
                         backgroundColor: 'gray',

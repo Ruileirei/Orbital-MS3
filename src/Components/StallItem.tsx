@@ -61,18 +61,22 @@ const StallItem: React.FC<StallItemProps> = ({ item }) => {
     };
 
     return (
-        <TouchableOpacity onPress={navigateStall} style={{
-            flexDirection: 'row',
-            padding: 12,
-            marginVertical: 6,
-            marginHorizontal: 10,
-            backgroundColor: '#fff',
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: '#ddd',
-            elevation: 1,
-            alignItems: 'center',
-        }}>
+        <TouchableOpacity 
+            onPress={navigateStall} 
+            style={{
+                flexDirection: 'row',
+                padding: 12,
+                marginVertical: 6,
+                marginHorizontal: 10,
+                backgroundColor: '#fff',
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: '#ddd',
+                elevation: 1,
+                alignItems: 'center',
+            }}
+            testID={`stall-item-${item.id}`}
+        >
             <Image
                 source={{
                     uri: item.menu && item.menu.length > 0

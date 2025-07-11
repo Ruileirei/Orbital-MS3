@@ -161,8 +161,8 @@ const MapScreen = () => {
                             >
                             <Callout tooltip={true}>
                                 <View style={MapStyle.calloutContainer}>
-                                    <Text style={MapStyle.title}>{stall.name}</Text>
-                                    <Text style={MapStyle.cuisine}>{stall.cuisine}</Text>
+                                    <Text style={MapStyle.title} testID="callout-stall-name">{stall.name}</Text>
+                                    <Text style={MapStyle.cuisine} testID="callout-stall-cuisine">{stall.cuisine}</Text>
                                     <Text style={MapStyle.rating}>{stall.rating}</Text>
                                     {stall.location && (<Text style={MapStyle.location}>{stall.location}</Text>)}
                                 </View>
@@ -186,6 +186,7 @@ const MapScreen = () => {
                     padding: 8,
                     borderRadius: 20
                     }}
+                    testID="arrow-left-button"
                 >
                     <Icon name="arrow-left" type="font-awesome" color="white" size={20} />
                 </TouchableOpacity>
@@ -225,8 +226,8 @@ const MapScreen = () => {
                 {selectedStall && (
                     <View style={MapStyle.modalContainer}>
                         <View style={MapStyle.modalContent}>
-                            <Text style={MapStyle.modalTitle}>{selectedStall.name}</Text>
-                            <Text style={MapStyle.modalCuisine}>{selectedStall.cuisine}</Text>
+                            <Text style={MapStyle.modalTitle} testID="modal-stall-name">{selectedStall.name}</Text>
+                            <Text style={MapStyle.modalCuisine} testID="modal-stall-cuisine">{selectedStall.cuisine}</Text>
                             <StarRating rating={selectedStall.rating}/>
                             {selectedStall.location && (
                                 <Text style={MapStyle.location}>{selectedStall.location}</Text>
@@ -239,7 +240,9 @@ const MapScreen = () => {
 
                             <TouchableOpacity 
                                 style={MapStyle.closeIcon}
-                                onPress={() => setSelectedStall(null)}>
+                                onPress={() => setSelectedStall(null)}
+                                testID="close-modal-button"
+                            >
                                 <Feather name="x" size={18} color='333'/>
                             </TouchableOpacity>
                         </View>
