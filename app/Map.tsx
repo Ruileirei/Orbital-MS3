@@ -3,11 +3,12 @@ import BotNavBar from "@/src/Components/navigationBar";
 import StarRating from "@/src/Components/starRating";
 import MapStyle from "@/src/styles/MapsPageStyle";
 import { Feather } from '@expo/vector-icons';
+import { Icon } from "@rneui/themed";
 import * as location from 'expo-location';
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { collection, getDocs } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Callout, Marker, Region } from 'react-native-maps';
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -122,7 +123,7 @@ const MapScreen = () => {
 
     const navStall = (item: Stall) => {
         router.push({
-            pathname:'/stall/[id]',
+            pathname:'/stall/[id]/stallIndex',
             params: {
                 id: item.id,
                 title: item.name,
@@ -142,7 +143,7 @@ const MapScreen = () => {
     }
 
     return (
-        <SafeAreaView style={{flex: 1, backgroundColor:'#fff'}}>
+        <SafeAreaView style={{flex: 1}} edges={['left', 'right', 'bottom']}>
             <View style={{flex: 1}}>
                 <MapView
                     ref={mapRef}
@@ -151,6 +152,7 @@ const MapScreen = () => {
                     showsUserLocation={true}
                     showsMyLocationButton={false}
                 >
+
                     {filterStalls.map(stall => (
                         <Marker
                             key={stall.id}
@@ -159,8 +161,8 @@ const MapScreen = () => {
                             >
                             <Callout tooltip={true}>
                                 <View style={MapStyle.calloutContainer}>
-                                    <Text style={MapStyle.title}>{stall.name}</Text>
-                                    <Text style={MapStyle.cuisine}>{stall.cuisine}</Text>
+                                    <Text style={MapStyle.title} testID="callout-stall-name">{stall.name}</Text>
+                                    <Text style={MapStyle.cuisine} testID="callout-stall-cuisine">{stall.cuisine}</Text>
                                     <Text style={MapStyle.rating}>{stall.rating}</Text>
                                     {stall.location && (<Text style={MapStyle.location}>{stall.location}</Text>)}
                                 </View>
@@ -168,6 +170,27 @@ const MapScreen = () => {
                         </Marker>
                     ))}
                 </MapView>
+                <Image
+                    source={require('../assets/images/storeShutter.png')}
+                    style={{ width: '101%', height: 110, top: 0, position: 'absolute' }}
+                    resizeMode="cover"
+                />
+
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    style={{
+                    position: 'absolute',
+                    top: 40,
+                    left: 20,
+                    backgroundColor: 'rgba(243, 18, 18, 0.4)',
+                    padding: 8,
+                    borderRadius: 20
+                    }}
+                    testID="arrow-left-button"
+                >
+                    <Icon name="arrow-left" type="font-awesome" color="white" size={20} />
+                </TouchableOpacity>
+                
                 <View style={MapStyle.mapSearchRow}>
                     <TouchableOpacity
                         style={MapStyle.mapSearchBar}
@@ -203,8 +226,8 @@ const MapScreen = () => {
                 {selectedStall && (
                     <View style={MapStyle.modalContainer}>
                         <View style={MapStyle.modalContent}>
-                            <Text style={MapStyle.modalTitle}>{selectedStall.name}</Text>
-                            <Text style={MapStyle.modalCuisine}>{selectedStall.cuisine}</Text>
+                            <Text style={MapStyle.modalTitle} testID="modal-stall-name">{selectedStall.name}</Text>
+                            <Text style={MapStyle.modalCuisine} testID="modal-stall-cuisine">{selectedStall.cuisine}</Text>
                             <StarRating rating={selectedStall.rating}/>
                             {selectedStall.location && (
                                 <Text style={MapStyle.location}>{selectedStall.location}</Text>
@@ -217,7 +240,9 @@ const MapScreen = () => {
 
                             <TouchableOpacity 
                                 style={MapStyle.closeIcon}
-                                onPress={() => setSelectedStall(null)}>
+                                onPress={() => setSelectedStall(null)}
+                                testID="close-modal-button"
+                            >
                                 <Feather name="x" size={18} color='333'/>
                             </TouchableOpacity>
                         </View>

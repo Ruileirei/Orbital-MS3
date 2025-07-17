@@ -5,7 +5,6 @@ const {width: screenWidth} = Dimensions.get('window');
 const StallStyle = StyleSheet.create ({
     container: {
         flex: 1,
-        padding: 20,
     },
     title: {
         fontSize: 22,

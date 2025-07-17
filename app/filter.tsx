@@ -77,6 +77,7 @@ const filterScreen = () => {
 
     const handleClear = () => {
         setSelectedCuisines([]);
+        setSelectedMisc([]);
         setHideClosed(false);
         setSortByRating('None');
     }
@@ -118,7 +119,7 @@ const filterScreen = () => {
                     containerStyle={{flex: 1, marginRight: 10}}
                 />
                 <Button
-                    title={`Apply (${selectedCuisine.length + selectedMisc.length})`}
+                    title={`Apply (${selectedCuisine.length + selectedMisc.length + (sortByRating !== 'None' ? 1 : 0)})`}
                     onPress={applyFilter}
                     buttonStyle={{backgroundColor:"black", borderRadius: 10}}
                     titleStyle={{color: 'white'}}

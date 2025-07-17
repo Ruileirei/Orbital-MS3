@@ -2,9 +2,9 @@ import { auth, db } from "@/firebase/firebaseConfig";
 import BotNavBar from "@/src/Components/navigationBar";
 import userStyle from "@/src/styles/userStyle";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
-import { doc, getDoc } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore";
+import React, { useCallback, useState } from "react";
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -19,63 +19,83 @@ const userPage = () => {
     });
     const [favStall, setFavStall] = useState<{id: string; name: string; cuisine: string}[]>([]);
     const [loading, setLoading] = useState(true);
+    const [userReviews, setUserReviews] = useState<any[]>([]);
 
-    useEffect(() => {
-        const fetchAllData = async () => {
+    useFocusEffect(
+        useCallback(() => {
+            let isActive = true;
+
+            const fetchAllData = async () => {
             try {
-            // Fetch user
-            const userRef = doc(db, "users", auth.currentUser?.uid ?? "");
-            const userSnap = await getDoc(userRef);
-            let favourites: string[] = [];
-            if (userSnap.exists()) {
+                setLoading(true);
+                const userRef = doc(db, "users", auth.currentUser?.uid ?? "");
+                const userSnap = await getDoc(userRef);
+
+                let favourites: string[] = [];
+                if (userSnap.exists()) {
                 const data = userSnap.data();
+                if (!isActive) return;
+
                 setUserdata({
-                name: data.username || "Default User",
-                email: data.email || "Default@gmail.com",
-                avatar: data.pfp || userData.avatar,
-                favourites: data.favourites || [],
+                    name: data.username || "Default User",
+                    email: data.email || "Default@gmail.com",
+                    avatar: data.pfp || userData.avatar,
+                    favourites: data.favourites || [],
                 });
                 favourites = data.favourites || [];
-            }
-
-            // Fetch stalls
-            const stalls: { id: string; name: string; cuisine: string }[] = [];
-            for (const stallId of favourites) {
+                }
+                const stalls: { id: string; name: string; cuisine: string }[] = [];
+                for (const stallId of favourites) {
+                if (!isActive) break;
                 try {
-                const stallRef = doc(db, 'stalls', stallId);
-                const stallSnap = await getDoc(stallRef);
-                if (stallSnap.exists()) {
+                    const stallRef = doc(db, 'stalls', stallId);
+                    const stallSnap = await getDoc(stallRef);
+                    if (stallSnap.exists()) {
                     const stallData = stallSnap.data();
                     stalls.push({
-                    id: stallId,
-                    name: stallData.name || "Unnamed stall",
-                    cuisine: stallData.cuisine || ""
+                        id: stallId,
+                        name: stallData.name || "Unnamed stall",
+                        cuisine: stallData.cuisine || ""
                     });
-                } else {
+                    } else {
+                    stalls.push({
+                        id: stallId,
+                        name: "Unknown stall",
+                        cuisine: "-"
+                    });
+                    }
+                } catch (error) {
+                    console.error(`Failed to fetch stall ${stallId}:`, error);
                     stalls.push({
                     id: stallId,
-                    name: "Unknown stall",
+                    name: "Error loading stall",
                     cuisine: "-"
                     });
                 }
-                } catch (error) {
-                console.error(`Failed to fetch stall ${stallId}:`, error);
-                    stalls.push({
-                        id: stallId,
-                        name: "Error loading stall",
-                        cuisine: "-"
-                    });
                 }
-            }
-            setFavStall(stalls);
+                if (isActive) setFavStall(stalls);
+                if (auth.currentUser) {
+                const reviewsRef = collection(db, "userReviews", auth.currentUser.uid, "reviews");
+                const q = query(reviewsRef, orderBy("time", "desc"));
+                const snapshot = await getDocs(q);
+                const reviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                if (isActive) setUserReviews(reviews);
+                }
             } catch (error) {
                 console.error("Failed to load data", error);
             } finally {
-                setLoading(false);
+                if (isActive) setLoading(false);
             }
-        };
-        fetchAllData();
-    }, []);
+            };
+
+            fetchAllData();
+
+            return () => {
+            isActive = false;
+            };
+        }, [])
+    );
+
 
 
     const handleLogout = () => {
@@ -140,7 +160,7 @@ const userPage = () => {
                                     contentContainerStyle={{paddingVertical: 4}}
                                     renderItem={({item}) => (
                                         <TouchableOpacity onPress={() => router.push({
-                                            pathname: '/stall/[id]',
+                                            pathname: '/stall/[id]/stallIndex',
                                             params: {id: item.id, title: item.name},
                                             })
                                         }
@@ -161,6 +181,40 @@ const userPage = () => {
                                 )}/>
                             )}
                         </View>
+                        <View style={{marginBottom: 20}}>
+                            <View style={{flexDirection:'row', alignItems: 'center', marginBottom: 10}}>
+                                <MaterialCommunityIcons name="star" size={20} color="#ffb933"/>
+                                <Text style={{marginLeft:6, fontWeight:'600', fontSize: 16}}>My Reviews</Text>
+                            </View>
+
+                            {userReviews.length === 0 ? (
+                                <Text style={{fontSize: 14, color: 'gray'}}>
+                                You haven't written any reviews yet.
+                                </Text>
+                            ) : (
+                                userReviews.map((item) => (
+                                <View key={item.id} style={{
+                                    marginBottom: 12,
+                                    backgroundColor: '#f9f9f9',
+                                    padding: 12,
+                                    borderRadius: 8,
+                                    borderColor: '#ddd',
+                                    borderWidth: 1,
+                                }}>
+                                    <Text style={{fontWeight: '700', marginBottom: 4}}>{item.stallName}</Text>
+                                    <Text style={{color: 'gray', fontSize: 12, marginBottom: 4}}>
+                                    {new Date(item.time?.seconds * 1000).toLocaleDateString()}
+                                    </Text>
+                                    <Text style={{marginBottom: 6}}>{item.comment}</Text>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                    <MaterialCommunityIcons name="star" size={16} color="#ffb933"/>
+                                    <Text style={{marginLeft: 4}}>{item.rating}/5</Text>
+                                    </View>
+                                </View>
+                                ))
+                            )}
+                        </View>
+
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
                             <TouchableOpacity
                                 onPress={() => router.push('/editProfile')}

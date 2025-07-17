@@ -1,11 +1,20 @@
+import * as registerService from '@/services/firebaseRegisterService';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { Alert } from 'react-native';
 import Register from '../app/register';
+
+jest.mock('@/services/firebaseRegisterService', () => ({
+  registerUser: jest.fn(),
+  saveUserData: jest.fn(),
+}));
 
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
 }));
+
+jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 
 describe('Register Screen', () => {
   const mockReplace = jest.fn();
@@ -15,6 +24,10 @@ describe('Register Screen', () => {
       replace: mockReplace,
       push: jest.fn(),
     });
+
+    (registerService.registerUser as jest.Mock).mockReset();
+    (registerService.saveUserData as jest.Mock).mockReset();
+    (Alert.alert as jest.Mock).mockClear();
   });
 
   it('renders all input fields', () => {
@@ -25,6 +38,9 @@ describe('Register Screen', () => {
   });
 
   it('calls registerUser and saveUserData on valid input', async () => {
+    (registerService.registerUser as jest.Mock).mockResolvedValue({ user: { uid: '123' } });
+    (registerService.saveUserData as jest.Mock).mockResolvedValue(undefined);
+
     render(<Register />);
 
     fireEvent.changeText(screen.getByPlaceholderText('Username'), 'TestUser');
@@ -33,12 +49,33 @@ describe('Register Screen', () => {
     fireEvent.press(screen.getByText('Register'));
 
     await waitFor(() => {
+      expect(registerService.registerUser).toHaveBeenCalledWith('test@example.com', 'password123');
+      expect(registerService.saveUserData).toHaveBeenCalledWith('123', expect.any(Object));
       expect(mockReplace).toHaveBeenCalledWith('/');
     });
   });
 
   it('shows alert if fields are empty', () => {
-    const { getByText } = render(<Register />);
-    fireEvent.press(getByText('Register'));
+    render(<Register />);
+    fireEvent.press(screen.getByText('Register'));
+
+    expect(Alert.alert).toHaveBeenCalledWith('Please fill in all fields');
+  });
+
+  it('shows success alert on successful register', async () => {
+    (registerService.registerUser as jest.Mock).mockResolvedValue({ user: { uid: '123' } });
+    (registerService.saveUserData as jest.Mock).mockResolvedValue(undefined);
+
+    render(<Register />);
+
+    fireEvent.changeText(screen.getByPlaceholderText('Username'), 'TestUser');
+    fireEvent.changeText(screen.getByPlaceholderText('Email'), 'test@example.com');
+    fireEvent.changeText(screen.getByPlaceholderText('Password'), 'password123');
+    fireEvent.press(screen.getByText('Register'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Registered successfully! Please Login.');
+    });
   });
 });
+

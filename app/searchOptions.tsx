@@ -1,7 +1,8 @@
 import mapOptionsStyle from "@/src/styles/mapSearchStyle";
+import { Icon } from "@rneui/themed";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Animated, Image, SafeAreaView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const LOCATIONIQ_API = 'pk.077fa777ead57a7b374b2821ddbcd89c';
 
@@ -9,7 +10,7 @@ const SearchOptions = () => {
     const router = useRouter();
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<any[]>([]);
-    const buttonTranslateVert = useRef(new Animated.Value(50)).current;
+    const buttonTranslateVert = useRef(new Animated.Value(0)).current;
     const handleSearch = async (text: string) => {
         setQuery(text);
         if (text.length < 2) {
@@ -33,7 +34,7 @@ const SearchOptions = () => {
 
     useEffect(() => {
         Animated.timing(buttonTranslateVert, {
-            toValue: results.length === 0 ? 1 : 0.3,
+            toValue: results.length === 0 ? 0 : 50,
             duration: 300,
             useNativeDriver: true
         }).start();
@@ -60,7 +61,29 @@ const SearchOptions = () => {
     };
 
     return (
-        <SafeAreaView style={{flex: 1, backgroundColor:'#fff'}}>
+        <SafeAreaView style={{flex: 1, backgroundColor:'#fff', paddingTop: 0}}>
+            <View style={{ position: 'relative' }}>
+                <Image
+                    source={require('../assets/images/storeShutter.png')}
+                    style={{ width: '101%', height: 110 }}
+                    resizeMode="cover"
+                />
+
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    style={{
+                    position: 'absolute',
+                    top: 40,
+                    left: 20,
+                    backgroundColor: 'rgba(243, 18, 18, 0.4)',
+                    padding: 8,
+                    borderRadius: 20
+                    }}
+                >
+                    <Icon name="arrow-left" type="font-awesome" color="white" size={20} />
+                </TouchableOpacity>
+            </View>
+
             <TextInput 
                 style={mapOptionsStyle.SearchInput}
                 placeholder="Type an area or place"

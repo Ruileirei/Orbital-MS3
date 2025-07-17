@@ -83,7 +83,7 @@ const MainPage = () => {
                     {stallOfTheDay && (
                         <TouchableOpacity
                             onPress={() => router.push({
-                                pathname: '/stall/[id]',
+                                pathname: '/stall/[id]/stallIndex',
                                 params: {
                                     id: stallOfTheDay.id,
                                     title: stallOfTheDay.name,
@@ -92,6 +92,7 @@ const MainPage = () => {
                                 },
                             })}
                             style={mainStyle.stalloftheday}
+                            testID="stall-of-the-day-button"
                         >
                             <View style={{flexDirection:'row', alignItems:'center', marginBottom:6}}>
                                 <MaterialCommunityIcons
@@ -124,13 +125,14 @@ const MainPage = () => {
                             <TouchableOpacity
                                 key={index}
                                 onPress={() => router.push({
-                                    pathname: '/stall/[id]',
+                                    pathname: '/stall/[id]/stallIndex',
                                     params: {
                                         id: stall.id,
                                     
                                     },
                                 })}
                                 style={mainStyle.openStallsIndividualContainer}
+                                testID={`open-now-stall-button-${stall.id}`}
                             >
                                 <Text style={{ fontSize: 15, fontWeight: '500' }}>{stall.name}</Text>
                                 <Text style={{ fontSize: 12, color: 'gray' }}>{stall.cuisine}</Text>

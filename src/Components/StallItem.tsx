@@ -50,7 +50,7 @@ const StallItem: React.FC<StallItemProps> = ({ item }) => {
 
     const navigateStall = () => {
         router.push({
-            pathname: '/stall/[id]',
+            pathname: '/stall/[id]/stallIndex',
             params: {
                 id: item.id,
                 title: item.title,
@@ -61,20 +61,28 @@ const StallItem: React.FC<StallItemProps> = ({ item }) => {
     };
 
     return (
-        <TouchableOpacity onPress={navigateStall} style={{
-            flexDirection: 'row',
-            padding: 12,
-            marginVertical: 6,
-            marginHorizontal: 10,
-            backgroundColor: '#fff',
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: '#ddd',
-            elevation: 1,
-            alignItems: 'center',
-        }}>
+        <TouchableOpacity 
+            onPress={navigateStall} 
+            style={{
+                flexDirection: 'row',
+                padding: 12,
+                marginVertical: 6,
+                marginHorizontal: 10,
+                backgroundColor: '#fff',
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: '#ddd',
+                elevation: 1,
+                alignItems: 'center',
+            }}
+            testID={`stall-item-${item.id}`}
+        >
             <Image
-                source={{ uri: item.menu?.[0] || "https://png.pngtree.com/png-vector/20221109/ourmid/pngtree-no-image-available-icon-flatvector-illustration-graphic-available-coming-vector-png-image_40958834.jpg" }}
+                source={{
+                    uri: item.menu && item.menu.length > 0
+                    ? item.menu[0]
+                    : "https://png.pngtree.com/png-vector/20221109/ourmid/pngtree-no-image-available-icon-flatvector-illustration-graphic-available-coming-vector-png-image_40958834.jpg",
+                }}
                 style={{ width: 60, height: 60, borderRadius: 8, marginRight: 12 }}
             />
             <View style={{ flex: 1 }}>

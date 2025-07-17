@@ -6,7 +6,7 @@ const MapStyle = StyleSheet.create({
     },
     mapSearchRow: {
         position: 'absolute',
-        top: 10,
+        top: 120,
         left: 10,
         right: 10,
         flexDirection: 'row',
