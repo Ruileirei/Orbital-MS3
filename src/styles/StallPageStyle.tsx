@@ -35,5 +35,20 @@ const StallStyle = StyleSheet.create ({
         right: 20,
         zIndex: 10,
     },
+    button: {
+        backgroundColor: '#ffb933',
+        padding: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 8,
+        height: 50,
+        width: 200
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: '600',
+        fontSize: 16,
+    },
+
 });
 export default StallStyle;

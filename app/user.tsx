@@ -33,16 +33,16 @@ const userPage = () => {
 
                 let favourites: string[] = [];
                 if (userSnap.exists()) {
-                const data = userSnap.data();
-                if (!isActive) return;
+                    const data = userSnap.data();
+                    if (!isActive) return;
 
-                setUserdata({
-                    name: data.username || "Default User",
-                    email: data.email || "Default@gmail.com",
-                    avatar: data.pfp || userData.avatar,
-                    favourites: data.favourites || [],
-                });
-                favourites = data.favourites || [];
+                    setUserdata({
+                        name: data.username || "Default User",
+                        email: data.email || "Default@gmail.com",
+                        avatar: data.pfp || userData.avatar,
+                        favourites: data.favourites || [],
+                    });
+                    favourites = data.favourites || [];
                 }
                 const stalls: { id: string; name: string; cuisine: string }[] = [];
                 for (const stallId of favourites) {

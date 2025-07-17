@@ -1,13 +1,14 @@
 import { auth } from "@/firebase/firebaseConfig";
 import { arrayRemove, arrayUnion, getStallDoc, getUserDoc, updateUserDoc } from "@/services/firestoreService";
+import { getPreviewReviews } from "@/services/stallService";
 import StarRating from "@/src/Components/starRating";
 import StallStyle from "@/src/styles/StallPageStyle";
 import { formatTime } from "@/src/utils/formatTime";
 import { getOpenStatus, OpenStatus } from '@/src/utils/isOpenStatus';
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Icon } from "@rneui/themed";
-import { useLocalSearchParams, useNavigation } from "expo-router";
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { ActivityIndicator, Dimensions, FlatList, Image, Modal, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
@@ -15,11 +16,16 @@ import Toast from "react-native-toast-message";
 const {width: screenWidth} = Dimensions.get('window');
 
 const StallInfo = () => {
+    const router = useRouter();
     const DAY_LABEL_WIDTH = "22%";
     const dayOrder = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const currentDayIndex = new Date().getDay();
     const currentDay = dayOrder[currentDayIndex];
-    const {id, title, cuisine, rating} = useLocalSearchParams();
+    const { id: rawId, title: rawTitle, cuisine: rawCuisine, rating: rawRating } = useLocalSearchParams();
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
+    const title = Array.isArray(rawTitle) ? rawTitle[0] : rawTitle;
+    const cuisine = Array.isArray(rawCuisine) ? rawCuisine[0] : rawCuisine;
+    const rating = Array.isArray(rawRating) ? rawRating[0] : rawRating;
     const navigation= useNavigation();
     type OpeningHours = {
         [key: string]: string | string[];
@@ -37,6 +43,9 @@ const StallInfo = () => {
     const [isOpenHrDropDown, setOpenHrDropDown] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isModalVisible, setModalVisible] = useState(false);
+    const [previewReviews, setPreviewReviews] = useState<any[]>([]);
+    const [reviewsLoading, setReviewsLoading] = useState(true);
+
 
     const openStatus: OpenStatus = getOpenStatus(stallData?.openingHours ?? {});
     let statusText = '';
@@ -71,11 +80,16 @@ const StallInfo = () => {
                 await updateUserDoc(auth.currentUser.uid, {
                     favourites: arrayRemove(id),
                 });
+                setIsSaved(false);
+                Toast.show({
+                    type: 'info',
+                    text1: 'Removed from favourites',
+                    text2: `${stallData?.name ?? title} was removed!`,
+                });
             } else {
                 await updateUserDoc(auth.currentUser.uid, {
                     favourites: arrayUnion(id),
                 });
-
                 setIsSaved(true);
                 Toast.show({
                     type: 'success',
@@ -102,7 +116,6 @@ const StallInfo = () => {
             }
             try {
                 const docRes = await getStallDoc(id.toString());
-
                 if (docRes.exists()) {
                     setStallData(docRes.data() as any);
                 } else {
@@ -116,7 +129,7 @@ const StallInfo = () => {
                 setLoading(false);
             }
         }
-        fetchStall();
+        fetchStall();  
     }, [id]);
 
     useEffect(() => {
@@ -146,6 +159,36 @@ const StallInfo = () => {
                : ["https://png.pngtree.com/png-vector/20221109/ourmid/pngtree-no-image-available-icon-flatvector-illustration-graphic-available-coming-vector-png-image_40958834.jpg"];
     }, [stallData]);
 
+    useFocusEffect(
+        useCallback(() => {
+            let isActive = true;
+
+            async function fetchReviews() {
+            if (!id) {
+                setReviewsLoading(false);
+                return;
+            }
+            try {
+                const results = await getPreviewReviews(id.toString());
+                if (isActive) {
+                setPreviewReviews(results);
+                }
+            } catch (error) {
+                console.error("Error fetching reviews:", error);
+            } finally {
+                if (isActive) setReviewsLoading(false);
+            }
+            }
+
+            fetchReviews();
+
+            return () => {
+            isActive = false;
+            };
+        }, [id])
+    );
+
+
     
     if (loading) {
         return (
@@ -164,14 +207,41 @@ const StallInfo = () => {
         );
     }
 
-    return (
+     return (
         <View style={StallStyle.container}>
-            <TouchableOpacity onPress={handleFavourite} style={StallStyle.saveIcon}>
+
+            <View style={{ position: 'relative' }}>
+                <Image
+                    source={require('../../../assets/images/storeShutter.png')}
+                    style={{ width: '101%', height: 110 }}
+                    resizeMode="cover"
+                />
+
+                <TouchableOpacity
+                    onPress={() => router.back()}
+                    style={{
+                    position: 'absolute',
+                    top: 40,
+                    left: 20,
+                    backgroundColor: 'rgba(243, 18, 18, 0.4)',
+                    padding: 8,
+                    borderRadius: 20
+                    }}
+                    testID="back-button"
+                >
+                    <Icon name="arrow-left" type="font-awesome" color="white" size={20} />
+                </TouchableOpacity>
+            </View>
+
+
+            <View style={{padding: 20}}>
+            <TouchableOpacity onPress={handleFavourite} style={StallStyle.saveIcon} testID="favourite-button">
                 <Icon 
                     name={isSaved ? 'heart' : 'heart-o'}
                     type='font-awesome'
                     size={24}
                     color={isSaved ? 'red' : 'gray'}
+                    testID="heart-icon"
                 />
             </TouchableOpacity>
             <Text style={StallStyle.title}>{stallData.name ?? title}</Text>
@@ -278,6 +348,7 @@ const StallInfo = () => {
                             setSelectedImage(item);
                             setModalVisible(true);
                         }}
+                        testID="menu-image-button"
                     >
                         <Image
                             source={{uri: item}}
@@ -295,7 +366,7 @@ const StallInfo = () => {
                 contentContainerStyle={{paddingHorizontal: 20}}
             />
             {selectedImage && (
-                <Modal visible={isModalVisible} transparent={true}>
+                <Modal visible={isModalVisible} transparent={true} testID="image-modal">
                     <View style={{
                         flex: 1,
                         backgroundColor: 'gray',
@@ -341,6 +412,73 @@ const StallInfo = () => {
                 </Modal>
             )}
         </View>
+        <View style={{padding: 20}}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={StallStyle.sectionTitle}>Reviews</Text>
+                <TouchableOpacity onPress={() => router.push(`/stall/${id}/allReviews`)}>
+                    <MaterialIcons name="arrow-forward-ios" size={20} color="black" />
+                </TouchableOpacity>
+            </View>
+
+            {reviewsLoading ? (
+                <ActivityIndicator size="small" color="#ffb933" />
+                ) : (
+                <>
+                    {previewReviews.length === 0 ? (
+                    <Text style={{ color: 'gray', marginBottom: 12 }}>No reviews yet!</Text>
+                    ) : (
+                    <FlatList
+                        data={previewReviews}
+                        horizontal
+                        keyExtractor={(item) => item.id}
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={({ item }) => (
+                            <View style={{
+                            width: screenWidth * 0.8,
+                            marginRight: 16,
+                            backgroundColor: '#f9f9f9',
+                            padding: 12,
+                            borderRadius: 8,
+                            }}>
+                            <StarRating rating={item.rating} size={16} />
+                            <Text style={{ fontWeight: '600', marginTop: 4 }}>{item.userName}</Text>
+                            <Text style={{ marginTop: 4 }}>{item.comment}</Text>
+                            {item.time?.seconds && (
+                                <Text style={{ color: 'gray', fontSize: 12, marginTop: 4 }}>
+                                {new Date(item.time.seconds * 1000).toLocaleDateString()}
+                                </Text>
+                            )}
+                            </View>
+                        )}
+                        contentContainerStyle={{ paddingLeft: 20 }}
+                    />
+                )}
+                <View style={{alignItems:'center'}}>
+                    <TouchableOpacity
+                        onPress={() =>
+                            router.push({
+                                pathname: '/stall/[id]/writeReview',
+                                params: {
+                                id: id,
+                                stallName: stallData?.name ?? title,
+                                },
+                            })
+                        }
+
+                        style={StallStyle.button}
+                    >
+                    <View style={{flexDirection:'row'}}>
+                        <MaterialIcons name="rate-review" size={20} color="white"/>
+                        <Text style={StallStyle.buttonText}>  Leave a Review</Text>
+                    </View>
+                    
+                    </TouchableOpacity>
+
+                </View>
+                </>
+            )}
+        </View>
+    </View>
     );
 };
 

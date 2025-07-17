@@ -51,7 +51,7 @@ const savedStalls = () => {
 
     const handleStallPress = (stall: any) => {
         router.push({
-            pathname: '/stall/[id]',
+            pathname: '/stall/[id]/stallIndex',
             params: {
                 id: stall.id,
                 title: stall.name,

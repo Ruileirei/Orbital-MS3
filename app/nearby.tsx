@@ -112,7 +112,7 @@ const NearbyScreen = () => {
 
     const navigateStall = (item: Stall) => {
         router.push({
-            pathname: '/stall/[id]',
+            pathname: '/stall/[id]/stallIndex',
             params: {
                 id: item.id,
                 title: item.title,
