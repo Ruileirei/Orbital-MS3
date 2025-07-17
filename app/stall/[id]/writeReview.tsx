@@ -1,26 +1,33 @@
-import { auth } from '@/firebase/firebaseConfig';
-import { Alert, SafeAreaView, ScrollView, View } from "react-native";
+import { auth, db } from '@/firebase/firebaseConfig';
+import { Alert, Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { addReviewToDatabase, updateStallRating } from '@/src/api/reviewApi';
+import StarRating from "@/src/Components/starRating";
+import ButtonStyles from "@/src/styles/ButtonStyles";
 import LeaveReviewStyle from "@/src/styles/LeaveReviewStyle";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { doc, getDoc } from 'firebase/firestore';
 import { useState } from "react";
+import { TextInput } from 'react-native-gesture-handler';
 
 const LeaveReviewPage = () => {
     const [userID, setUserID] = useState("");
-    const [stallID, setStallID] = useState("");
     const [text, setText] = useState("");
-    const [rating, setRating] = useState();
+    const [rating, setRating] = useState(0);
     const [reviewID, setReviewID] = useState("");
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
-    const {id} = useLocalSearchParams();
+    const [userData, setUserData] = useState({
+        name: "Default User",
+        avatar: 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg',
+    });
+    const {id, name} = useLocalSearchParams();
+    const stallID = Array.isArray(id) ? id[0] : id;
+    const router = useRouter();
 
     const handleReview = async () => {
-        if (!auth.currentUser) {
-            console.log("User is not logged in");
-            return;
-        } else if (!userID || !stallID || !text || !rating) {
+
+        if (!userID || !stallID || !text || !rating) {
             Alert.alert("Please fill in all fields");
             return;
         } 
@@ -36,7 +43,7 @@ const LeaveReviewPage = () => {
             const rid = await addReviewToDatabase(rev);
             setReviewID(rid.toString());
             setSuccess(true);
-            Alert.alert("You have left a review!)");
+            Alert.alert("You have left a review!");
 
             await updateStallRating(rev);
 
@@ -51,21 +58,80 @@ const LeaveReviewPage = () => {
         }
     };    
 
+    const getData = async () => {
+        if (!auth.currentUser) {
+            console.log("User is not logged in");
+            return;
+        }
+        setLoading(true);
+        
+        try {
+            const userRef = doc(db, "users", auth.currentUser?.uid ?? "");
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+                setUserData({
+                    name: data.name,
+                    avatar: data.pfp
+                });
+                setUserID(auth.currentUser?.uid);
+            }
+            
+        } catch (error) {
+            console.error("Error verifying user: ", error);
+            setSuccess(false);
+        } finally {
+            setLoading(false);
+        }
+        
+    };
+
     return (
         <View style = {LeaveReviewStyle.background}>
             <SafeAreaView> 
                 <ScrollView
-                    contentContainerStyle={{
-                            flexGrow: 1,
-                            justifyContent: 'flex-start',
-                            alignItems: 'center',
-                            paddingTop: 120,
-                            paddingBottom: 50,
-                        }}
-                        keyboardShouldPersistTaps='handled'
+                    contentContainerStyle={LeaveReviewStyle.reviewBox}
+                    keyboardShouldPersistTaps='handled'
                 >
+
+                    <View style = {{alignItems: 'flex-start', marginTop: 10,}}>
+                        <Image
+                        source={{ uri:userData.avatar}}
+                        style={{ width: 50, height: 50, borderRadius: 25}} />
+
+                        <Text style = {{color: 'black', fontSize: 13}} >{userData.name}</Text>
+                    </View>
+                    <StarRating onPress = {setRating} size = {20} rating = {rating}/> 
+
+                    <ScrollView
+                        contentContainerStyle={LeaveReviewStyle.input}>
+                        <TextInput 
+                            value = {text}
+                            onChangeText={setText}
+                            placeholder="Write your review here..."
+                            multiline
+                            style = {LeaveReviewStyle.input}/>
+                        
+                    </ScrollView>
+
+                    <View style = {ButtonStyles.LeftButtonContainer}>
+                        <TouchableOpacity 
+                            style = {ButtonStyles.largeGreyButton}
+                            onPress = {() => router.back()}>
+                            
+                            <Text style = {ButtonStyles.orangeText}>Cancel</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity 
+                            style = {ButtonStyles.largeOrangeButton}
+                            onPress =  {handleReview}>
+                            <Text style = {ButtonStyles.largeButtonText}>Post</Text>
+                        </TouchableOpacity>
+                    </View>
+                    
                     
                 </ScrollView>
+
             </SafeAreaView>
 
         </View>

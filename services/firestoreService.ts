@@ -2,10 +2,7 @@ import { db } from "@/firebase/firebaseConfig";
 import type { DocumentData, DocumentSnapshot, QueryDocumentSnapshot } from 'firebase/firestore';
 
 import type { Stall } from "@/src/types/Stall";
-<<<<<<< HEAD
 import type { Review } from "@/src/types/reviewItem";
-=======
->>>>>>> main
 
 export function getStallDoc(id: string): Promise<DocumentSnapshot<DocumentData>> {
   const { doc, getDoc } = require("firebase/firestore");
