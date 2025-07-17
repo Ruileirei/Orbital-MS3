@@ -76,7 +76,7 @@ const SearchScreen = () => {
 
   const navigateStall = (stall: Stall["id"]) => {
     router.push({
-      pathname: '/stall/[id]',
+      pathname: '/stall/[id]/stallIndex',
       params: {
         id: stall,
       },

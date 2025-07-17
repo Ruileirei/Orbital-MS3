@@ -192,7 +192,7 @@ describe('SearchScreen', () => {
     fireEvent.press(screen.getByTestId('stall-item-stall-1'));
 
     expect(mockPush).toHaveBeenCalledWith({
-      pathname: '/stall/[id]',
+      pathname: '/stall/[id]/stallIndex',
       params: {
         id: 'stall-1',
         title: 'Mock Stall 1',

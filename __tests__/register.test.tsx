@@ -5,18 +5,15 @@ import React from 'react';
 import { Alert } from 'react-native';
 import Register from '../app/register';
 
-// ✅ Mock the services
 jest.mock('@/services/firebaseRegisterService', () => ({
   registerUser: jest.fn(),
   saveUserData: jest.fn(),
 }));
 
-// ✅ Mock the router
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
 }));
 
-// ✅ Mock Alert
 jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 
 describe('Register Screen', () => {
@@ -28,7 +25,6 @@ describe('Register Screen', () => {
       push: jest.fn(),
     });
 
-    // Reset service mocks before each test
     (registerService.registerUser as jest.Mock).mockReset();
     (registerService.saveUserData as jest.Mock).mockReset();
     (Alert.alert as jest.Mock).mockClear();

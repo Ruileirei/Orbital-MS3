@@ -84,7 +84,7 @@ describe('MapScreen', () => {
     });
   });
 
-  it('has MapView component', async () => {
+  it('renders MapView component', async () => {
     (getDocs as jest.Mock).mockResolvedValue({ docs: [] });
     render(<MapScreen />);
     await waitFor(() => {
@@ -163,7 +163,7 @@ describe('MapScreen', () => {
     fireEvent.press(seeMoreButton);
 
     expect(mockPush).toHaveBeenCalledWith(expect.objectContaining({
-      pathname: '/stall/[id]',
+      pathname: '/stall/[id]/stallIndex',
       params: expect.objectContaining({
         id: 'stall-1',
       }),

@@ -7,7 +7,28 @@ jest.mock('@/src/utils/isOpenStatus', () => ({
   getOpenStatus: jest.fn(() => 'OPEN'),
 }));
 
-// Mocks
+jest.mock('@/src/Components/CategoryList', () => {
+  return () => {
+    const React = require('react');
+    const { View, Text, TouchableOpacity } = require('react-native');
+    const { useRouter } = require('expo-router');
+    const router = useRouter();
+
+    return (
+      <View>
+        <Text>Category List</Text>
+        <TouchableOpacity
+          testID="category-button"
+          onPress={() => router.push(`/group/group-1`)}
+        >
+          <Text>Mock Category</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+});
+
+
 import * as firestoreService from '@/services/firestoreService';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useRouter } from 'expo-router';
@@ -89,7 +110,39 @@ describe('MainPage', () => {
     expect(mockPush).toHaveBeenCalledWith('./search');
   });
 
-  it('navigates to see more when See More is pressed', async () => {
+  it('navigates to group page when category button is pressed', async () => {
+    render(<MainPage />);
+    const categoryButton = await screen.findByTestId('category-button');
+    fireEvent.press(categoryButton);
+    expect(mockPush).toHaveBeenCalledWith('/group/group-1');
+  });
+
+  it('navigates to stall page when Stall of the Day is pressed', async () => {
+    render(<MainPage />);
+    const stallOfDayButton = await screen.findByTestId('stall-of-the-day-button');
+    fireEvent.press(stallOfDayButton);
+    expect(mockPush).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: '/stall/[id]/stallIndex',
+        params: expect.objectContaining({ id: 'stall-1' }),
+      })
+    );
+  });
+
+  it('navigates to stall page when Open Now stall is pressed', async () => {
+    render(<MainPage />);
+    const openNowButton = await screen.findByTestId('open-now-stall-button-stall-1');
+    fireEvent.press(openNowButton);
+    expect(mockPush).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: '/stall/[id]/stallIndex',
+        params: expect.objectContaining({ id: 'stall-1' }),
+      })
+    );
+  });
+
+
+  it('navigates to filtered search page when See More is pressed', async () => {
     render(<MainPage />);
     const seeMore = await screen.findByText(/See More/i);
     fireEvent.press(seeMore);

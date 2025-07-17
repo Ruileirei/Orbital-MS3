@@ -1,12 +1,20 @@
 import * as firestoreService from '@/services/firestoreService';
+import * as stallService from '@/services/stallService';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import StallInfo from '../app/stall/[id]';
+import StallInfo from '../app/stall/[id]/stallIndex';
 
 jest.mock('@/firebase/firebaseConfig', () => ({
   auth: { currentUser: { uid: 'testUserId' } },
 }));
+
+jest.mock('@/services/stallService', () => ({
+  getPreviewReviews: jest.fn(),
+  addReviewForStall: jest.fn(),
+  getAllReviews: jest.fn(),
+}));
+
 
 jest.mock('@/services/firestoreService', () => ({
   getStallDoc: jest.fn(),
@@ -56,6 +64,10 @@ describe('StallInfo screen', () => {
     (useRouter as jest.Mock).mockReturnValue({
       back: mockBack,
     });
+
+    (stallService.getPreviewReviews as jest.Mock).mockResolvedValue([
+      { id: 'rev1', rating: 5, comment: 'Excellent!', userName: 'Alice', time: { seconds: 1690000000 } },
+    ]);
 
     (firestoreService.getUserDoc as jest.Mock).mockResolvedValue({
       exists: () => true,

@@ -4,9 +4,8 @@ module.exports = {
     '^.+\\.[jt]sx?$': 'babel-jest',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(expo|@expo|expo-.*|firebase|@firebase/.*|@firebase|react-native|@react-native|@react-navigation|react-native-.*|@rneui)/)',
+  'node_modules/(?!(expo|@expo|expo-.*|firebase|@firebase.*|react-native|@react-native|@react-navigation|react-native-.*|@rneui)/)',
   ],
-
   setupFiles: ['./jest.setup.js'],
 };
 

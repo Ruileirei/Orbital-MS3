@@ -123,7 +123,7 @@ const MapScreen = () => {
 
     const navStall = (item: Stall) => {
         router.push({
-            pathname:'/stall/[id]',
+            pathname:'/stall/[id]/stallIndex',
             params: {
                 id: item.id,
                 title: item.name,

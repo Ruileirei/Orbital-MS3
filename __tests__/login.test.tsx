@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { useRouter } from 'expo-router';
 import React from 'react';
+import { Alert } from 'react-native';
 import LoginScreen from '../app/index';
 
 jest.mock('expo-router', () => ({
@@ -10,7 +11,9 @@ jest.mock('expo-router', () => ({
 describe('LoginScreen', () => {
   const mockReplace = jest.fn();
   const mockPush = jest.fn();
+
   beforeEach(() => {
+    jest.clearAllMocks();
     mockReplace.mockClear();
     mockPush.mockClear();
 
@@ -18,6 +21,8 @@ describe('LoginScreen', () => {
       replace: mockReplace,
       push: mockPush,
     });
+
+    jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   });
 
   it('renders email and password fields', () => {
@@ -38,8 +43,29 @@ describe('LoginScreen', () => {
   });
 
   it('shows alert if fields are empty', () => {
-    const { getByText } = render(<LoginScreen />);
-    fireEvent.press(getByText('Login'));
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText('Login'));
+
+    expect(Alert.alert).toHaveBeenCalledWith('Please enter your email and password');
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it('shows alert if password is missing', () => {
+    render(<LoginScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText('Email'), 'test@example.com');
+    fireEvent.press(screen.getByText('Login'));
+
+    expect(Alert.alert).toHaveBeenCalledWith('Please enter your email and password');
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it('shows alert if email is missing', () => {
+    render(<LoginScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText('Password'), 'password123');
+    fireEvent.press(screen.getByText('Login'));
+
+    expect(Alert.alert).toHaveBeenCalledWith('Please enter your email and password');
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 
   it('navigates to forgot password page when pressed', () => {
@@ -53,5 +79,4 @@ describe('LoginScreen', () => {
     fireEvent.press(screen.getByText('Register'));
     expect(mockReplace).toHaveBeenCalledWith('/register');
   });
-
 });

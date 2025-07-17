@@ -50,7 +50,7 @@ const StallItem: React.FC<StallItemProps> = ({ item }) => {
 
     const navigateStall = () => {
         router.push({
-            pathname: '/stall/[id]',
+            pathname: '/stall/[id]/stallIndex',
             params: {
                 id: item.id,
                 title: item.title,

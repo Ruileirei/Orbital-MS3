@@ -92,7 +92,7 @@ describe('GroupPage', () => {
     });
   });
 
-  it('navigates to stall detail when stall is pressed', async () => {
+  it('navigates to individual stall when pressed', async () => {
     (getDoc as jest.Mock)
       .mockResolvedValueOnce({
         exists: () => true,
@@ -116,7 +116,7 @@ describe('GroupPage', () => {
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith(
         expect.objectContaining({
-          pathname: '/stall/[id]',
+          pathname: '/stall/[id]/stallIndex',
           params: expect.objectContaining({ id: 'stall-1' }),
         })
       );
