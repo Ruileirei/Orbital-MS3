@@ -4,12 +4,12 @@ const LeaveReviewStyle = StyleSheet.create({
     background: {
         flex: 1,
         backgroundColor: 'transparent',
-        paddingVertical: 40,
-        paddingHorizontal: 60,
+        //paddingVertical: 40,
+        paddingHorizontal: 40,
     },
 
     reviewBox: {
-        flex: 1,
+        //flex: 1,
         justifyContent: 'flex-start',
         backgroundColor: '#FDF1E7',
         padding: 32,
@@ -19,12 +19,13 @@ const LeaveReviewStyle = StyleSheet.create({
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 10,
-        shadowOffset: { width: 0, height: 4 },
+        //shadowOffset: { width: 0, height: 4 },
         marginTop: 20,
     },
 
     input: {
-        height: 48,
+        flex: 1,
+        height: 150,
         borderColor: '#ffb933',
         borderWidth: 1,
         borderRadius: 8,
