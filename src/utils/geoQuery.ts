@@ -11,6 +11,7 @@ interface Stall {
     latitude: number;
     longitude: number;
     distanceToUser?: number;
+    menu?: string[];
 }
 
 export const geoQuery = async (userLat: number, userLong: number, radiusMeters: number): Promise<Stall[]> => {
@@ -46,7 +47,8 @@ export const geoQuery = async (userLat: number, userLong: number, radiusMeters: 
                     openingHours: data.openingHours ?? {},
                     latitude: lat,
                     longitude: long,
-                    distanceToUser: distKm
+                    distanceToUser: distKm,
+                    menu: data.menu ?? "https://png.pngtree.com/png-vector/20221109/ourmid/pngtree-no-image-available-icon-flatvector-illustration-graphic-available-coming-vector-png-image_40958834.jpg",
                 });
             }
         });
