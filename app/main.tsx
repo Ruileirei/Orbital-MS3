@@ -1,5 +1,6 @@
 import { auth } from '@/firebase/firebaseConfig';
 import { fetchAllStalls, fetchUserData } from "@/services/firestoreService";
+import { getCuisineBasedRecommendations } from '@/services/recommendationService';
 import CategoryList from '@/src/Components/CategoryList';
 import BotNavBar from '@/src/Components/navigationBar';
 import StarRating from '@/src/Components/starRating';
@@ -9,7 +10,7 @@ import { getOpenStatus } from '@/src/utils/isOpenStatus';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
@@ -26,6 +27,10 @@ const MainPage = () => {
     const [stallOfTheDay, setStallOfTheDay] = useState<any>(null);
     const [openStalls, setOpenStalls] = useState<Stall[]>([]);
     const [loading, setLoading] = useState(true);
+    const [userId, setUserId] = useState<string | null>(null);
+    const [recommendations, setRecommendations] = useState<any[]>([]);
+    const [recLoading, setRecLoading] = useState(true);
+
     useEffect(() => {
         const fetchAll = async () => {
             try {
@@ -35,7 +40,11 @@ const MainPage = () => {
                     if (snap.exists()) {
                         const data = snap.data();
                         setUsername(data.username || 'User');
+                        setUserId(user.uid);
                     }
+                    const recs = await getCuisineBasedRecommendations(user.uid);
+                    setRecommendations(recs);
+                    setRecLoading(false);
                 }
                 const allStalls = await fetchAllStalls();
                 const selected = pickStall(allStalls);
@@ -80,6 +89,70 @@ const MainPage = () => {
                         </TouchableOpacity>
                     </View>
                     <CategoryList/>
+
+                    {!recLoading && (
+                        <View style={{ paddingHorizontal: 16, marginBottom: 20 }}>
+                            <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 10 }}>Recommended For You</Text>
+                            {recommendations.length > 0 ? (
+                            <FlatList
+                                data={recommendations}
+                                horizontal
+                                keyExtractor={(item) => item.id}
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={{ paddingVertical: 4 }}
+                                renderItem={({ item: stall }) => (
+                                <TouchableOpacity
+                                    key={stall.id}
+                                    onPress={() =>
+                                        router.push({
+                                            pathname: '/stall/[id]/stallIndex',
+                                            params: {
+                                            id: stall.id,
+                                            title: stall.name || 'Stall',
+                                            cuisine: stall.cuisine || 'Various',
+                                            rating: (stall.rating ?? 0).toString(),
+                                            },
+                                        })
+                                    }
+                                    style={{
+                                        width: 180,
+                                        marginRight: 12,
+                                        padding: 12,
+                                        backgroundColor: '#f9f9f9',
+                                        borderRadius: 12,
+                                        borderColor: '#ddd',
+                                        borderWidth: 1,
+                                    }}
+                                >
+                                    <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 6 }}>{stall.name || 'Unnamed Stall'}</Text>
+                                    <Text style={{ fontSize: 12, color: 'gray', marginBottom: 6 }}>{stall.cuisine || 'Various Cuisine'}</Text>
+                                    <StarRating 
+                                        rating={Number(stall.rating) || 0} 
+                                        size={12} 
+                                    />
+                                </TouchableOpacity>
+                                )}
+                                ListEmptyComponent={
+                                    <View style={{ width: '100%', padding: 12 }}>
+                                        <Text style={{ color: 'gray', fontSize: 14, textAlign: 'center' }}>
+                                            {userId ? "Save some stalls or leave reviews to get recommendations!" 
+                                                    : "Sign in to get personalized recommendations"
+                                            }
+                                        </Text>
+                                    </View>
+                                }
+                            />
+                            ) : (
+                                <View style={{ padding: 12 }}>
+                                    <Text style={{ color: 'gray', fontSize: 14, textAlign: 'center' }}>
+                                        {userId ? "Save some stalls or leave reviews to get recommendations!"
+                                                : "Sign in to get personalized recommendations"
+                                        }
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    )}
                     {stallOfTheDay && (
                         <TouchableOpacity
                             onPress={() => router.push({

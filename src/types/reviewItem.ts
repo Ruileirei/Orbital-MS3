@@ -1,11 +1,21 @@
+import { Timestamp } from "firebase/firestore";
 
-export interface Review {
-    userID: string;
+export interface UserReview {
+    userId: string;
     stallID: string;
-    text: string;
+    comment: string;
     rating: number;
+    userName: string;
+    time: Timestamp;
 }
 
+export type Review = {
+  id: string;
+  rating: number;
+  comment: string;
+  userName: string;
+  timestamp: Timestamp;
+};
 /* 
 1. reviews page: button to write review 
 2. reviews page: display reviews (display users review first)

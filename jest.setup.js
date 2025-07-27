@@ -82,3 +82,30 @@ jest.mock('expo-location', () => ({
     coords: { latitude: 1.3521, longitude: 103.8198 }
   })),
 }));
+
+jest.mock('@/services/userService', () => ({
+  fetchUserProfile: jest.fn(() =>
+    Promise.resolve({
+      username: 'Mock User',
+      email: 'mock@example.com',
+      pfp: '',
+      favourites: ['stall-1'],
+    })
+  ),
+  fetchFavouriteStalls: jest.fn(() =>
+    Promise.resolve([
+      { id: 'stall-1', name: 'Mock Stall 1', cuisine: 'Japanese' },
+    ])
+  ),
+  fetchUserReviews: jest.fn(() =>
+    Promise.resolve([
+      {
+        id: 'review-1',
+        stallName: 'Mock Stall 1',
+        time: { seconds: 1620000000 },
+        comment: 'Loved the food!',
+        rating: 5,
+      },
+    ])
+  ),
+}));
