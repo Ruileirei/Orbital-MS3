@@ -7,6 +7,32 @@ jest.mock('@/src/utils/isOpenStatus', () => ({
   getOpenStatus: jest.fn(() => 'OPEN'),
 }));
 
+jest.mock('firebase/firestore', () => {
+  return {
+    getDoc: jest.fn(() =>
+      Promise.resolve({
+        exists: () => true,
+        data: () => ({
+          username: 'TestUser',
+          favourites: [],
+        }),
+      })
+    ),
+    getDocs: jest.fn(() =>
+      Promise.resolve({
+        docs: [
+          { data: () => ({ stallId: 'stall-1', rating: 5 }) }
+        ]
+      })
+    ),
+    collection: jest.fn(),
+    doc: jest.fn(),
+    query: jest.fn(),
+    where: jest.fn(),
+  };
+});
+
+
 jest.mock('@/src/Components/CategoryList', () => {
   return () => {
     const React = require('react');
@@ -106,7 +132,7 @@ describe('MainPage', () => {
   it('navigates to search screen when search bar is pressed', async () => {
     render(<MainPage />);
     const searchButton = await screen.findByText(/Search for hawker food/i);
-    fireEvent.press(searchButton.parent);
+    fireEvent.press(searchButton.parent!);
     expect(mockPush).toHaveBeenCalledWith('./search');
   });
 

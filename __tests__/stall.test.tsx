@@ -30,11 +30,13 @@ jest.mock('react-native-toast-message', () => ({
 
 jest.mock('expo-router', () => ({
   useLocalSearchParams: jest.fn(),
-  useNavigation: () => ({
-    setOptions: jest.fn(),
-  }),
   useRouter: jest.fn(),
+  useNavigation: jest.fn(() => ({
+    setOptions: jest.fn(),
+  })),
+  useFocusEffect: jest.fn((cb) => cb()),
 }));
+
 
 jest.mock('@rneui/themed', () => {
   const React = require('react');

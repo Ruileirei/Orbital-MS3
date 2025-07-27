@@ -209,99 +209,86 @@ const StallInfo = () => {
 
      return (
         <View style={StallStyle.container}>
-
-            <View style={{ position: 'relative' }}>
-                <Image
-                    source={require('../../../assets/images/storeShutter.png')}
-                    style={{ width: '101%', height: 110 }}
-                    resizeMode="cover"
-                />
-
-                <TouchableOpacity
-                    onPress={() => router.back()}
-                    style={{
-                    position: 'absolute',
-                    top: 40,
-                    left: 20,
-                    backgroundColor: 'rgba(243, 18, 18, 0.4)',
-                    padding: 8,
-                    borderRadius: 20
-                    }}
-                    testID="back-button"
-                >
-                    <Icon name="arrow-left" type="font-awesome" color="white" size={20} />
-                </TouchableOpacity>
-            </View>
-
-
-            <View style={{padding: 20}}>
-            <TouchableOpacity onPress={handleFavourite} style={StallStyle.saveIcon} testID="favourite-button">
-                <Icon 
-                    name={isSaved ? 'heart' : 'heart-o'}
-                    type='font-awesome'
-                    size={24}
-                    color={isSaved ? 'red' : 'gray'}
-                    testID="heart-icon"
-                />
-            </TouchableOpacity>
-            <Text style={StallStyle.title}>{stallData.name ?? title}</Text>
-            <Text style={StallStyle.subtitle}> Cuisine: {stallData.cuisine ?? cuisine}</Text>
-            <View style={{flexDirection:'row', alignItems:'center', marginVertical: 4}}>
-                <StarRating rating={stallData.rating ?? (rating ? Number(rating) : 0)} size={20}/>
-            </View>
-            <View style={{flexDirection: 'row', alignItems:'center', marginBottom: 8}}>
-                <Icon
-                    name="location-on"
-                    type="material"
-                    size={20}
-                    color='gray'
-                    style={{marginRight: 8}}
-                 />
-                <Text style={StallStyle.subtitle}>
-                    <Text style={{fontWeight: 'bold'}}>Location: </Text>
-                    {stallData.location ?? "Location not available"}
-                </Text> 
-            </View>
-            
-            <TouchableOpacity
-                onPress={() => setOpenHrDropDown(prev => !prev)}
-                style={{flexDirection: 'row', alignItems:'center', marginVertical:8}}
+            <ScrollView 
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{paddingBottom: 40}}
             >
-                <Icon
-                    name="access-time"
-                    type="material"
-                    size={20}
-                    color={statusColor}
-                    style={{marginRight: 8}}
-                />
-                <Text style={{fontSize: 16, fontWeight:'600', color: statusColor}}>
-                    {statusText}
-                </Text>
-            </TouchableOpacity>
+                <View style={{ position: 'relative' }}>
+                    <Image
+                        source={require('../../../assets/images/storeShutter.png')}
+                        style={{ width: '101%', height: 110 }}
+                        resizeMode="cover"
+                    />
 
-            {isOpenHrDropDown && stallData.openingHours && (
-                <View style={{paddingLeft: 28, marginBottom: 8}}>
-                    {dayOrder.map((day) => {
-                        const value = stallData.openingHours?.[day];
-                        return (
-                            <View key={day} style={{marginBottom: 4}}>
-                                {typeof value === 'string' ? (
-                                    <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
-                                        <Text
-                                            style={{
-                                                fontSize: 14,
-                                                fontWeight: day === currentDay ? 'bold' : 'normal',
-                                                width: DAY_LABEL_WIDTH,
-                                            }}
-                                        >
-                        {day.charAt(0).toUpperCase() + day.slice(1)}:
-                                        </Text>
-                                        <Text style={{fontSize: 14}}>
-                                            {value}
-                                        </Text>
-                                    </View>
-                                ) : (
-                                    <>
+                    <TouchableOpacity
+                        onPress={() => router.back()}
+                        style={{
+                        position: 'absolute',
+                        top: 40,
+                        left: 20,
+                        backgroundColor: 'rgba(243, 18, 18, 0.4)',
+                        padding: 8,
+                        borderRadius: 20
+                        }}
+                        testID="back-button"
+                    >
+                        <Icon name="arrow-left" type="font-awesome" color="white" size={20} />
+                    </TouchableOpacity>
+                </View>
+
+
+                <View style={{padding: 20}}>
+                <TouchableOpacity onPress={handleFavourite} style={StallStyle.saveIcon} testID="favourite-button">
+                    <Icon 
+                        name={isSaved ? 'heart' : 'heart-o'}
+                        type='font-awesome'
+                        size={24}
+                        color={isSaved ? 'red' : 'gray'}
+                        testID="heart-icon"
+                    />
+                </TouchableOpacity>
+                <Text style={StallStyle.title}>{stallData.name ?? title}</Text>
+                <Text style={StallStyle.subtitle}> Cuisine: {stallData.cuisine ?? cuisine}</Text>
+                <View style={{flexDirection:'row', alignItems:'center', marginVertical: 4}}>
+                    <StarRating rating={stallData.rating ?? (rating ? Number(rating) : 0)} size={20}/>
+                </View>
+                <View style={{flexDirection: 'row', alignItems:'center', marginBottom: 8}}>
+                    <Icon
+                        name="location-on"
+                        type="material"
+                        size={20}
+                        color='gray'
+                        style={{marginRight: 8}}
+                    />
+                    <Text style={StallStyle.subtitle}>
+                        <Text style={{fontWeight: 'bold'}}>Location: </Text>
+                        {stallData.location ?? "Location not available"}
+                    </Text> 
+                </View>
+                
+                <TouchableOpacity
+                    onPress={() => setOpenHrDropDown(prev => !prev)}
+                    style={{flexDirection: 'row', alignItems:'center', marginVertical:8}}
+                >
+                    <Icon
+                        name="access-time"
+                        type="material"
+                        size={20}
+                        color={statusColor}
+                        style={{marginRight: 8}}
+                    />
+                    <Text style={{fontSize: 16, fontWeight:'600', color: statusColor}}>
+                        {statusText}
+                    </Text>
+                </TouchableOpacity>
+
+                {isOpenHrDropDown && stallData.openingHours && (
+                    <View style={{paddingLeft: 28, marginBottom: 8}}>
+                        {dayOrder.map((day) => {
+                            const value = stallData.openingHours?.[day];
+                            return (
+                                <View key={day} style={{marginBottom: 4}}>
+                                    {typeof value === 'string' ? (
                                         <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
                                             <Text
                                                 style={{
@@ -310,174 +297,189 @@ const StallInfo = () => {
                                                     width: DAY_LABEL_WIDTH,
                                                 }}
                                             >
-                                                {day.charAt(0).toUpperCase() + day.slice(1)}:
+                            {day.charAt(0).toUpperCase() + day.slice(1)}:
                                             </Text>
                                             <Text style={{fontSize: 14}}>
-                                                {value && value.length > 0 ? formatTime(value[0]) : ""}
+                                                {value}
                                             </Text>
                                         </View>
-                                        {value?.slice(1).map((slot, index) => (
-                                            <View key={index} style={{flexDirection: 'row'}}>
-                                                <View style={{width: DAY_LABEL_WIDTH}} />
+                                    ) : (
+                                        <>
+                                            <View style={{flexDirection: 'row', alignItems: 'flex-start'}}>
                                                 <Text
                                                     style={{
                                                         fontSize: 14,
+                                                        fontWeight: day === currentDay ? 'bold' : 'normal',
+                                                        width: DAY_LABEL_WIDTH,
                                                     }}
                                                 >
-                                                    {formatTime(slot)}
+                                                    {day.charAt(0).toUpperCase() + day.slice(1)}:
+                                                </Text>
+                                                <Text style={{fontSize: 14}}>
+                                                    {value && value.length > 0 ? formatTime(value[0]) : ""}
                                                 </Text>
                                             </View>
-                                        ))}
-                                    </>
-                                )}
-                            </View>
-                        );
-                    })}
-                </View>
-            )}
-
-            <Text style={StallStyle.sectionTitle}>Menu</Text>
-            <FlatList
-                data={images}
-                horizontal
-                keyExtractor={(item, index) => `${item}-${index}`}
-                showsHorizontalScrollIndicator={false}
-                renderItem={({item}) => (
-                    <TouchableOpacity
-                        onPress={() => {
-                            setSelectedImage(item);
-                            setModalVisible(true);
-                        }}
-                        testID="menu-image-button"
-                    >
-                        <Image
-                            source={{uri: item}}
-                            style={{
-                                width: screenWidth-40,
-                                height: 300,
-                                borderRadius: 12,
-                                marginRight: 20,
-                                marginLeft: -16,
-                                resizeMode:'cover'
-                            }}
-                        />
-                    </TouchableOpacity>
+                                            {value?.slice(1).map((slot, index) => (
+                                                <View key={index} style={{flexDirection: 'row'}}>
+                                                    <View style={{width: DAY_LABEL_WIDTH}} />
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 14,
+                                                        }}
+                                                    >
+                                                        {formatTime(slot)}
+                                                    </Text>
+                                                </View>
+                                            ))}
+                                        </>
+                                    )}
+                                </View>
+                            );
+                        })}
+                    </View>
                 )}
-                contentContainerStyle={{paddingHorizontal: 20}}
-            />
-            {selectedImage && (
-                <Modal visible={isModalVisible} transparent={true} testID="image-modal">
-                    <View style={{
-                        flex: 1,
-                        backgroundColor: 'gray',
-                        opacity: 0.9,
-                        justifyContent:'center',
-                        alignItems:'center',
-                    }}>
+
+                <Text style={StallStyle.sectionTitle}>Menu</Text>
+                <FlatList
+                    data={images}
+                    horizontal
+                    keyExtractor={(item, index) => `${item}-${index}`}
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={({item}) => (
                         <TouchableOpacity
-                            onPress={() => setModalVisible(false)}
-                            style={{
-                                position: 'absolute',
-                                top: 40,
-                                right: 20,
-                                zIndex: 10,
+                            onPress={() => {
+                                setSelectedImage(item);
+                                setModalVisible(true);
                             }}
+                            testID="menu-image-button"
                         >
-                            <MaterialCommunityIcons name="close" size={20} color='white'/>
-                        </TouchableOpacity>
-                        <ScrollView
-                            contentContainerStyle={{
-                                flexGrow: 1,
-                                justifyContent:'flex-start',
-                                alignItems:'center',
-                                paddingTop: 60,
-                            }}
-                            maximumZoomScale={4}
-                            minimumZoomScale={1}
-                            showsHorizontalScrollIndicator={false}
-                            showsVerticalScrollIndicator={false}
-                            bounces={false}
-                            centerContent
-                        >
-                            <Image  
-                                source={{uri: selectedImage}}
+                            <Image
+                                source={{uri: item}}
                                 style={{
-                                    width: screenWidth * 0.9,
-                                    aspectRatio: 3/5,
-                                    resizeMode: 'contain',
+                                    width: screenWidth-40,
+                                    height: 300,
+                                    borderRadius: 12,
+                                    marginRight: 20,
+                                    marginLeft: -16,
+                                    resizeMode:'cover'
                                 }}
                             />
-                        </ScrollView>
-                    </View>
-                </Modal>
-            )}
-        </View>
-        <View style={{padding: 20}}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={StallStyle.sectionTitle}>Reviews</Text>
-                <TouchableOpacity onPress={() => router.push(`/stall/${id}/allReviews`)}>
-                    <MaterialIcons name="arrow-forward-ios" size={20} color="black" />
-                </TouchableOpacity>
-            </View>
-
-            {reviewsLoading ? (
-                <ActivityIndicator size="small" color="#ffb933" />
-                ) : (
-                <>
-                    {previewReviews.length === 0 ? (
-                    <Text style={{ color: 'gray', marginBottom: 12 }}>No reviews yet!</Text>
-                    ) : (
-                    <FlatList
-                        data={previewReviews}
-                        horizontal
-                        keyExtractor={(item) => item.id}
-                        showsHorizontalScrollIndicator={false}
-                        renderItem={({ item }) => (
-                            <View style={{
-                            width: screenWidth * 0.8,
-                            marginRight: 16,
-                            backgroundColor: '#f9f9f9',
-                            padding: 12,
-                            borderRadius: 8,
-                            }}>
-                            <StarRating rating={item.rating} size={16} />
-                            <Text style={{ fontWeight: '600', marginTop: 4 }}>{item.userName}</Text>
-                            <Text style={{ marginTop: 4 }}>{item.comment}</Text>
-                            {item.time?.seconds && (
-                                <Text style={{ color: 'gray', fontSize: 12, marginTop: 4 }}>
-                                {new Date(item.time.seconds * 1000).toLocaleDateString()}
-                                </Text>
-                            )}
-                            </View>
-                        )}
-                        contentContainerStyle={{ paddingLeft: 20 }}
-                    />
+                        </TouchableOpacity>
+                    )}
+                    contentContainerStyle={{paddingHorizontal: 20}}
+                />
+                {selectedImage && (
+                    <Modal visible={isModalVisible} transparent={true} testID="image-modal">
+                        <View style={{
+                            flex: 1,
+                            backgroundColor: 'gray',
+                            opacity: 0.9,
+                            justifyContent:'center',
+                            alignItems:'center',
+                        }}>
+                            <TouchableOpacity
+                                onPress={() => setModalVisible(false)}
+                                style={{
+                                    position: 'absolute',
+                                    top: 40,
+                                    right: 20,
+                                    zIndex: 10,
+                                }}
+                            >
+                                <MaterialCommunityIcons name="close" size={20} color='white'/>
+                            </TouchableOpacity>
+                            <ScrollView
+                                contentContainerStyle={{
+                                    flexGrow: 1,
+                                    justifyContent:'flex-start',
+                                    alignItems:'center',
+                                    paddingTop: 60,
+                                }}
+                                maximumZoomScale={4}
+                                minimumZoomScale={1}
+                                showsHorizontalScrollIndicator={false}
+                                showsVerticalScrollIndicator={false}
+                                bounces={false}
+                                centerContent
+                            >
+                                <Image  
+                                    source={{uri: selectedImage}}
+                                    style={{
+                                        width: screenWidth * 0.9,
+                                        aspectRatio: 3/5,
+                                        resizeMode: 'contain',
+                                    }}
+                                />
+                            </ScrollView>
+                        </View>
+                    </Modal>
                 )}
-                <View style={{alignItems:'center'}}>
-                    <TouchableOpacity
-                        onPress={() =>
-                            router.push({
-                                pathname: '/stall/[id]/writeReview',
-                                params: {
-                                id: id,
-                                stallName: stallData?.name ?? title,
-                                },
-                            })
-                        }
-
-                        style={StallStyle.button}
-                    >
-                    <View style={{flexDirection:'row'}}>
-                        <MaterialIcons name="rate-review" size={20} color="white"/>
-                        <Text style={StallStyle.buttonText}>  Leave a Review</Text>
-                    </View>
-                    
+            </View>
+            <View style={{padding: 20}}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={StallStyle.sectionTitle}>Reviews</Text>
+                    <TouchableOpacity onPress={() => router.push(`/stall/${id}/allReviews`)}>
+                        <MaterialIcons name="arrow-forward-ios" size={20} color="black" />
                     </TouchableOpacity>
-
                 </View>
-                </>
-            )}
-        </View>
+
+                {reviewsLoading ? (
+                    <ActivityIndicator size="small" color="#ffb933" />
+                    ) : (
+                    <>
+                        {previewReviews.length === 0 ? (
+                        <Text style={{ color: 'gray', marginBottom: 12 }}>No reviews yet!</Text>
+                        ) : (
+                        <View style={{ paddingLeft: 20 }}>
+                            {previewReviews.map(item => (
+                                <View
+                                key={item.id}
+                                style={{
+                                    width: screenWidth * 0.8,
+                                    marginBottom: 16,
+                                    backgroundColor: '#f9f9f9',
+                                    padding: 12,
+                                    borderRadius: 8,
+                                }}
+                                >
+                                <StarRating rating={item.rating} size={16} />
+                                <Text style={{ fontWeight: '600', marginTop: 4 }}>{item.userName}</Text>
+                                <Text style={{ marginTop: 4 }}>{item.comment}</Text>
+                                {item.time?.seconds && (
+                                    <Text style={{ color: 'gray', fontSize: 12, marginTop: 4 }}>
+                                    {new Date(item.time.seconds * 1000).toLocaleDateString()}
+                                    </Text>
+                                )}
+                                </View>
+                            ))}
+                        </View>
+                    )}
+                    <View style={{alignItems:'center'}}>
+                        <TouchableOpacity
+                            onPress={() =>
+                                router.push({
+                                    pathname: '/stall/[id]/writeReview',
+                                    params: {
+                                    id: id,
+                                    stallName: stallData?.name ?? title,
+                                    },
+                                })
+                            }
+
+                            style={StallStyle.button}
+                        >
+                        <View style={{flexDirection:'row'}}>
+                            <MaterialIcons name="rate-review" size={20} color="white"/>
+                            <Text style={StallStyle.buttonText}>  Leave a Review</Text>
+                        </View>
+                        
+                        </TouchableOpacity>
+
+                    </View>
+                    </>
+                )}
+            </View>
+        </ScrollView>
     </View>
     );
 };

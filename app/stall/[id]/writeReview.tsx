@@ -1,142 +1,126 @@
-import { auth, db } from '@/firebase/firebaseConfig';
-import { Alert, Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
-
-import { addReviewToDatabase, updateStallRating } from '@/src/api/reviewApi';
+import { auth, db } from "@/firebase/firebaseConfig";
+import { addReviewForStall } from "@/services/stallService";
 import StarRating from "@/src/Components/starRating";
-import ButtonStyles from "@/src/styles/ButtonStyles";
 import LeaveReviewStyle from "@/src/styles/LeaveReviewStyle";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { doc, getDoc } from 'firebase/firestore';
-import { useState } from "react";
-import { TextInput } from 'react-native-gesture-handler';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-const LeaveReviewPage = () => {
-    const [userID, setUserID] = useState("");
-    const [text, setText] = useState("");
-    const [rating, setRating] = useState(0);
-    const [reviewID, setReviewID] = useState("");
-    const [success, setSuccess] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [userData, setUserData] = useState({
-        name: "Default User",
-        avatar: 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg',
-    });
-    const {id, name} = useLocalSearchParams();
-    const stallID = Array.isArray(id) ? id[0] : id;
-    const router = useRouter();
+const WriteReviewScreen = () => {
+  const router = useRouter();
+  const { id: rawid } = useLocalSearchParams();
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [userData, setUserData] = useState<{ name: string; avatar: string }>({
+    name: 'User',
+    avatar: 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg',
+  });
+  const id = Array.isArray(rawid) ? rawid[0] : rawid;
+  if (!id) {
+    return (
+      <View style={LeaveReviewStyle.center}>
+        <Text style={LeaveReviewStyle.errorText}>Invalid Stall ID.</Text>
+      </View>
+    );
+  }
 
-    const handleReview = async () => {
-
-        if (!userID || !stallID || !text || !rating) {
-            Alert.alert("Please fill in all fields");
-            return;
-        } 
-        setLoading(true);
-
+  useEffect(() => {
+    const fetchUserData = async () => {
+        if (!auth.currentUser?.uid) return;
         try {
-            const rev = {
-                userID,
-                stallID, 
-                text,
-                rating, 
-            }
-            const rid = await addReviewToDatabase(rev);
-            setReviewID(rid.toString());
-            setSuccess(true);
-            Alert.alert("You have left a review!");
-
-            await updateStallRating(rev);
-
-            //router.replace('/');
-
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            const data = userSnap.data();
+            setUserData({
+            name: data.username || "Anonymous",
+            avatar: data.pfp || 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg',
+            });
+        }
         } catch (error) {
-            console.error("Error leaving review: ", error);
-            setSuccess(false);
-
-        } finally {
-            setLoading(false);
+        console.error("Failed to load user data:", error);
         }
-    };    
-
-    const getData = async () => {
-        if (!auth.currentUser) {
-            console.log("User is not logged in");
-            return;
-        }
-        setLoading(true);
-        
-        try {
-            const userRef = doc(db, "users", auth.currentUser?.uid ?? "");
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists()) {
-                const data = userSnap.data();
-                setUserData({
-                    name: data.name,
-                    avatar: data.pfp
-                });
-                setUserID(auth.currentUser?.uid);
-            }
-            
-        } catch (error) {
-            console.error("Error verifying user: ", error);
-            setSuccess(false);
-        } finally {
-            setLoading(false);
-        }
-        
     };
 
-    return (
-        <View style = {LeaveReviewStyle.background}>
-            <SafeAreaView> 
-                <ScrollView
-                    contentContainerStyle={LeaveReviewStyle.reviewBox}
-                    keyboardShouldPersistTaps='handled'
-                >
+    fetchUserData();
+  }, []);
 
-                    <View style = {{alignItems: 'flex-start', marginTop: 10,}}>
-                        <Image
-                        source={{ uri:userData.avatar}}
-                        style={{ width: 50, height: 50, borderRadius: 25}} />
+  const handleSubmit = async () => {
+    setErrorMsg('');
+    if (!auth.currentUser) {
+      setErrorMsg("You must be logged in to leave a review.");
+      return;
+    }
+    if (rating === 0 || comment.trim() === '') {
+      setErrorMsg("Please provide a rating and a comment.");
+      return;
+    }
 
-                        <Text style = {{color: 'black', fontSize: 13}} >{userData.name}</Text>
-                    </View>
-                    <StarRating onPress = {setRating} size = {20} rating = {rating}/> 
+    try {
+      setLoading(true);
+      await addReviewForStall(id , rating, comment);
+      router.back();
+    } catch (error) {
+      console.error(error);
+      setErrorMsg("Error submitting review. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                    <ScrollView
-                        contentContainerStyle={LeaveReviewStyle.input}>
-                        <TextInput 
-                            value = {text}
-                            onChangeText={setText}
-                            placeholder="Write your review here..."
-                            multiline
-                            style = {LeaveReviewStyle.input}/>
-                        
-                    </ScrollView>
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={LeaveReviewStyle.container}
+    >     
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+        <Image
+            source={{ uri: userData.avatar }}
+            style={{ width: 40, height: 40, borderRadius: 20, marginRight: 12 }}
+        />
+        <Text style={{ fontSize: 16, fontWeight: '600' }}>{userData.name}</Text>
+      </View>
+      <Text style={LeaveReviewStyle.label}>Your Rating</Text>
+      <StarRating rating={rating} size={32} onPress={setRating} />
 
-                    <View style = {ButtonStyles.LeftButtonContainer}>
-                        <TouchableOpacity 
-                            style = {ButtonStyles.largeGreyButton}
-                            onPress = {() => router.back()}>
-                            
-                            <Text style = {ButtonStyles.orangeText}>Cancel</Text>
-                        </TouchableOpacity>
+      <Text style={LeaveReviewStyle.label}>Your Comment</Text>
+      <TextInput
+        value={comment}
+        onChangeText={setComment}
+        placeholder="Write your review here..."
+        multiline
+        style={LeaveReviewStyle.input}
+      />
 
-                        <TouchableOpacity 
-                            style = {ButtonStyles.largeOrangeButton}
-                            onPress =  {handleReview}>
-                            <Text style = {ButtonStyles.largeButtonText}>Post</Text>
-                        </TouchableOpacity>
-                    </View>
-                    
-                    
-                </ScrollView>
+      {errorMsg ? <Text style={LeaveReviewStyle.errorText}>{errorMsg}</Text> : null}
 
-            </SafeAreaView>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={[LeaveReviewStyle.button, { backgroundColor: '#ccc', flex: 1, marginRight: 8 }]}
+        >
+          <Text style={[LeaveReviewStyle.buttonText, { color: '#333' }]}>Cancel</Text>
+        </TouchableOpacity>
 
-        </View>
-            
-    );
-}
+        <TouchableOpacity
+          onPress={handleSubmit}
+          disabled={loading}
+          style={[LeaveReviewStyle.button, { flex: 1, marginLeft: 8 }]}
+        >
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={LeaveReviewStyle.buttonText}>Post</Text>
+          )}
+        </TouchableOpacity>
+      </View>
 
-export default LeaveReviewPage;
+    </KeyboardAvoidingView>
+  );
+};
+
+export default WriteReviewScreen;
+

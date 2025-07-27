@@ -2,8 +2,9 @@ import { registerUser, saveUserData } from "@/services/firebaseRegisterService";
 import RegisterStyle from "@/src/styles/RegisterStyle";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ScrollView, StatusBar, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 const Register = () => {
     const router = useRouter();
 
@@ -21,24 +22,17 @@ const Register = () => {
         }
         setLoading(true);
 
-        // can add additional password checks here. Firebase has a strict password requirement of 6 characters
-
         try {
-            const userCredential = await registerUser(email, password);
-            console.log('Registered:', userCredential.user);
-            
+            const userCredential = await registerUser(email, password);            
             await saveUserData(userCredential.user.uid, {
                 username,
                 email,
                 favourites: [],
                 createdAt: new Date(),
             });
-
-
             setError('');
             setSuccess(true);
             Alert.alert("Registered successfully! Please Login.");
-
             router.replace('/');
 
         } catch (err: any) {
@@ -68,57 +62,58 @@ const Register = () => {
    
 
     return (
-        <SafeAreaView style={RegisterStyle.background}>
-            <ScrollView
-                contentContainerStyle={{
-                    flexGrow: 1,
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                    paddingTop: 120,
-                    paddingBottom: 50,
-                }}
-                keyboardShouldPersistTaps='handled'
+        <SafeAreaView style={RegisterStyle.background} edges={['left', 'right', 'bottom']}>
+            <StatusBar translucent backgroundColor="transparent"/>
+            <ScrollView 
+                contentContainerStyle={{ flexGrow: 1, backgroundColor: '#f0f2f5'}}
+                keyboardShouldPersistTaps="handled"
             >
-                <Image source={require('../assets/images/FoodFindrLogoRMBG.png')} 
-                    style={RegisterStyle.foodfindrLogo}
-                    resizeMode='contain'
+                <Image
+                source={require('../assets/images/storeShutter.png')}
+                style={{width: '101%', height: 110}}
+                resizeMode="cover"
                 />
-
-                <View style={RegisterStyle.registerBox}>
-                    <TextInput 
-                        style={RegisterStyle.input}
-                        placeholder="Username"
-                        value={username} 
-                        onChangeText={setUsername} 
-                        autoCapitalize="none"
+                <View style={{paddingBottom: 50, paddingTop: 120, alignItems: 'center', paddingHorizontal: 60, }}>
+                    <Image source={require('../assets/images/FoodFindrLogoRMBG.png')} 
+                            style={RegisterStyle.foodfindrLogo}
+                            resizeMode="contain"
                     />
+                    <View style={RegisterStyle.registerBox}>
+                        <TextInput 
+                            style={RegisterStyle.input}
+                            placeholder="Username"
+                            value={username} 
+                            onChangeText={setUsername} 
+                            autoCapitalize="none"
+                        />
 
-                    <TextInput 
-                        placeholder="Email" 
-                        style={RegisterStyle.input} 
-                        value={email} 
-                        onChangeText={setEmail} 
-                        keyboardType="email-address" 
-                        autoCapitalize="none"
-                    />
+                        <TextInput 
+                            placeholder="Email" 
+                            style={RegisterStyle.input} 
+                            value={email} 
+                            onChangeText={setEmail} 
+                            keyboardType="email-address" 
+                            autoCapitalize="none"
+                        />
 
-                    <TextInput 
-                        placeholder="Password" 
-                        style={RegisterStyle.input} 
-                        value={password} 
-                        onChangeText={setPassword} 
-                        secureTextEntry
-                    />
+                        <TextInput 
+                            placeholder="Password" 
+                            style={RegisterStyle.input} 
+                            value={password} 
+                            onChangeText={setPassword} 
+                            secureTextEntry
+                        />
 
-                    <View style={RegisterStyle.buttonContainer}>
+                        <View style={RegisterStyle.buttonContainer}>
 
-                        <TouchableOpacity 
-                            style={RegisterStyle.button} 
-                            onPress={handleRegister} 
-                            disabled={loading}
-                        >
-                            <Text style={RegisterStyle.buttonText}>Register</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity 
+                                style={RegisterStyle.button} 
+                                onPress={handleRegister} 
+                                disabled={loading}
+                            >
+                                <Text style={RegisterStyle.buttonText}>Register</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
            </ScrollView>     

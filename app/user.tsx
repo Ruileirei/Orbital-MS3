@@ -1,23 +1,25 @@
-import { auth, db } from "@/firebase/firebaseConfig";
+import { auth } from "@/firebase/firebaseConfig";
+import { fetchFavouriteStalls, fetchUserProfile, fetchUserReviews } from "@/services/userService";
 import BotNavBar from "@/src/Components/navigationBar";
 import userStyle from "@/src/styles/userStyle";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from "expo-router";
-import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore";
 import React, { useCallback, useState } from "react";
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-const userPage = () => {
+const DEFAULT_AVATAR = 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg';
+
+const UserPage = () => {
     const router = useRouter();
     const [userData, setUserdata] = useState({
         name: "Default User",
         email: "Default@gmail.com",
-        avatar: 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg',
+        avatar: DEFAULT_AVATAR,
         favourites: [] as string[],
     });
-    const [favStall, setFavStall] = useState<{id: string; name: string; cuisine: string}[]>([]);
+    const [favStall, setFavStall] = useState<{ id: string; name: string; cuisine: string }[]>([]);
     const [loading, setLoading] = useState(true);
     const [userReviews, setUserReviews] = useState<any[]>([]);
 
@@ -26,90 +28,51 @@ const userPage = () => {
             let isActive = true;
 
             const fetchAllData = async () => {
-            try {
-                setLoading(true);
-                const userRef = doc(db, "users", auth.currentUser?.uid ?? "");
-                const userSnap = await getDoc(userRef);
-
-                let favourites: string[] = [];
-                if (userSnap.exists()) {
-                    const data = userSnap.data();
-                    if (!isActive) return;
-
-                    setUserdata({
-                        name: data.username || "Default User",
-                        email: data.email || "Default@gmail.com",
-                        avatar: data.pfp || userData.avatar,
-                        favourites: data.favourites || [],
-                    });
-                    favourites = data.favourites || [];
-                }
-                const stalls: { id: string; name: string; cuisine: string }[] = [];
-                for (const stallId of favourites) {
-                if (!isActive) break;
                 try {
-                    const stallRef = doc(db, 'stalls', stallId);
-                    const stallSnap = await getDoc(stallRef);
-                    if (stallSnap.exists()) {
-                    const stallData = stallSnap.data();
-                    stalls.push({
-                        id: stallId,
-                        name: stallData.name || "Unnamed stall",
-                        cuisine: stallData.cuisine || ""
-                    });
-                    } else {
-                    stalls.push({
-                        id: stallId,
-                        name: "Unknown stall",
-                        cuisine: "-"
-                    });
+                    setLoading(true);
+                    const profile = await fetchUserProfile();
+                    if (isActive && profile) {
+                        setUserdata({
+                            name: profile.username || "Default User",
+                            email: profile.email || "Default@gmail.com",
+                            avatar: profile.pfp || DEFAULT_AVATAR,
+                            favourites: profile.favourites || [],
+                        });
+
+                        const stalls = await fetchFavouriteStalls(profile.favourites || []);
+                        if (isActive) setFavStall(stalls);
+                    }
+
+                    if (auth.currentUser) {
+                        const reviews = await fetchUserReviews();
+                        if (isActive) setUserReviews(reviews);
                     }
                 } catch (error) {
-                    console.error(`Failed to fetch stall ${stallId}:`, error);
-                    stalls.push({
-                    id: stallId,
-                    name: "Error loading stall",
-                    cuisine: "-"
-                    });
+                    console.error("Failed to load data", error);
+                } finally {
+                    if (isActive) setLoading(false);
                 }
-                }
-                if (isActive) setFavStall(stalls);
-                if (auth.currentUser) {
-                const reviewsRef = collection(db, "userReviews", auth.currentUser.uid, "reviews");
-                const q = query(reviewsRef, orderBy("time", "desc"));
-                const snapshot = await getDocs(q);
-                const reviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                if (isActive) setUserReviews(reviews);
-                }
-            } catch (error) {
-                console.error("Failed to load data", error);
-            } finally {
-                if (isActive) setLoading(false);
-            }
             };
 
             fetchAllData();
-
             return () => {
-            isActive = false;
+                isActive = false;
             };
         }, [])
     );
-
-
 
     const handleLogout = () => {
         Alert.alert(
             'Logout',
             'Are you sure you want to logout?',
-            [{text: 'cancel', style: 'cancel'},
+            [
+                { text: 'cancel', style: 'cancel' },
                 {
-                text: 'Logout',
-                style: 'destructive',
-                onPress: () => {
-                    router.replace('/');
+                    text: 'Logout',
+                    style: 'destructive',
+                    onPress: () => router.replace('/'),
                 },
-            },]
+            ]
         );
     };
 
@@ -130,87 +93,92 @@ const userPage = () => {
                 <View style={{ flex: 1 }}>
                     <View style={userStyle.headerContainer}>
                         <Image
-                        source={{ uri: userData.avatar }}
-                        style={{ width: 50, height: 50, borderRadius: 25, marginRight: 12, borderWidth: 1, borderColor: "#fff" }}
+                            source={{ uri: userData.avatar }}
+                            style={{ width: 50, height: 50, borderRadius: 25, marginRight: 12, borderWidth: 1, borderColor: "#fff" }}
                         />
                         <View>
                             <Text style={{ color: "white", fontSize: 16, fontWeight: "600" }}>{userData.name}</Text>
                             <Text style={{ color: "#ffe", fontSize: 13 }}>{userData.email}</Text>
                         </View>
                     </View>
-                    <ScrollView style={{flex: 1}} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 180}}>
-                        <View style={{marginBottom: 20}}>
-                            <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom: 10}}>
-                                <View style={{flexDirection:'row', alignItems: 'center'}}>
-                                    <MaterialCommunityIcons name="bookmark" size={20} color="#ffb933"/>
-                                    <Text style={{marginLeft:6, fontWeight:'600', fontSize: 16}}>Saved</Text>
+                    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 180 }}>
+                        <View style={{ marginBottom: 20 }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <MaterialCommunityIcons name="bookmark" size={20} color="#ffb933" />
+                                    <Text style={{ marginLeft: 6, fontWeight: '600', fontSize: 16 }}>Saved</Text>
                                 </View>
-                                <TouchableOpacity onPress={() => router.push('/userSavedStalls')}>
-                                    <MaterialCommunityIcons name='arrow-right' size={20} color="#ffb933"/>
+                                <TouchableOpacity onPress={() => router.push('/userSavedStalls')} testID="navigate-saved-stalls">
+                                    <MaterialCommunityIcons name='arrow-right' size={20} color="#ffb933" />
                                 </TouchableOpacity>
                             </View>
                             {favStall.length === 0 ? (
-                                <Text style={{fontSize: 14, color: 'gray'}}>You have no favourite stalls yet.</Text>)
-                                                    : (
+                                <Text style={{ fontSize: 14, color: 'gray' }}>You have no favourite stalls yet.</Text>
+                            ) : (
                                 <FlatList
                                     data={favStall}
                                     horizontal
                                     keyExtractor={(item) => item.id}
                                     showsHorizontalScrollIndicator={false}
-                                    contentContainerStyle={{paddingVertical: 4}}
-                                    renderItem={({item}) => (
-                                        <TouchableOpacity onPress={() => router.push({
-                                            pathname: '/stall/[id]/stallIndex',
-                                            params: {id: item.id, title: item.name},
-                                            })
-                                        }
-                                    style={{
-                                        width:180,
-                                        marginRight: 12,
-                                        padding: 12,
-                                        backgroundColor: "#f9f9f9",
-                                        borderRadius: 12,
-                                        borderColor: '#ddd',
-                                        borderWidth: 1, 
-                                        justifyContent: 'center',
-                                    }}
-                                >
-                                    <Text style={{fontSize: 14, fontWeight:'600', marginBottom: 6}}>{item.name}</Text>
-                                    <Text style={{ fontSize: 12, color: 'gray' }}>{item.cuisine || 'No cuisine info'}</Text>
-                                </TouchableOpacity>
-                                )}/>
+                                    contentContainerStyle={{ paddingVertical: 4 }}
+                                    renderItem={({ item }) => (
+                                        <TouchableOpacity
+                                            testID={`fav-stall-${item.id}`}
+                                            onPress={() => router.push({
+                                                pathname: '/stall/[id]/stallIndex',
+                                                params: { id: item.id, title: item.name },
+                                            })}
+                                            style={{
+                                                width: 180,
+                                                marginRight: 12,
+                                                padding: 12,
+                                                backgroundColor: "#f9f9f9",
+                                                borderRadius: 12,
+                                                borderColor: '#ddd',
+                                                borderWidth: 1,
+                                                justifyContent: 'center',
+                                            }}
+                                        >
+                                            <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 6 }}>{item.name}</Text>
+                                            <Text style={{ fontSize: 12, color: 'gray' }}>{item.cuisine || 'No cuisine info'}</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                />
                             )}
                         </View>
-                        <View style={{marginBottom: 20}}>
-                            <View style={{flexDirection:'row', alignItems: 'center', marginBottom: 10}}>
-                                <MaterialCommunityIcons name="star" size={20} color="#ffb933"/>
-                                <Text style={{marginLeft:6, fontWeight:'600', fontSize: 16}}>My Reviews</Text>
+
+                        <View style={{ marginBottom: 20 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                                <MaterialCommunityIcons name="star" size={20} color="#ffb933" />
+                                <Text style={{ marginLeft: 6, fontWeight: '600', fontSize: 16 }}>My Reviews</Text>
                             </View>
 
                             {userReviews.length === 0 ? (
-                                <Text style={{fontSize: 14, color: 'gray'}}>
-                                You haven't written any reviews yet.
-                                </Text>
+                                <Text style={{ fontSize: 14, color: 'gray' }}>You haven't written any reviews yet.</Text>
                             ) : (
                                 userReviews.map((item) => (
-                                <View key={item.id} style={{
-                                    marginBottom: 12,
-                                    backgroundColor: '#f9f9f9',
-                                    padding: 12,
-                                    borderRadius: 8,
-                                    borderColor: '#ddd',
-                                    borderWidth: 1,
-                                }}>
-                                    <Text style={{fontWeight: '700', marginBottom: 4}}>{item.stallName}</Text>
-                                    <Text style={{color: 'gray', fontSize: 12, marginBottom: 4}}>
-                                    {new Date(item.time?.seconds * 1000).toLocaleDateString()}
-                                    </Text>
-                                    <Text style={{marginBottom: 6}}>{item.comment}</Text>
-                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                    <MaterialCommunityIcons name="star" size={16} color="#ffb933"/>
-                                    <Text style={{marginLeft: 4}}>{item.rating}/5</Text>
+                                    <View 
+                                        key={item.id} 
+                                        style={{
+                                            marginBottom: 12,
+                                            backgroundColor: '#f9f9f9',
+                                            padding: 12,
+                                            borderRadius: 8,
+                                            borderColor: '#ddd',
+                                            borderWidth: 1,
+                                        }}
+                                        testID={`review-${item.id}`}
+                                    >
+                                        <Text style={{ fontWeight: '700', marginBottom: 4 }}>{item.stallName}</Text>
+                                        <Text style={{ color: 'gray', fontSize: 12, marginBottom: 4 }}>
+                                            {new Date(item.time?.seconds * 1000).toLocaleDateString()}
+                                        </Text>
+                                        <Text style={{ marginBottom: 6 }}>{item.comment}</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <MaterialCommunityIcons name="star" size={16} color="#ffb933" />
+                                            <Text style={{ marginLeft: 4 }}>{item.rating}/5</Text>
+                                        </View>
                                     </View>
-                                </View>
                                 ))
                             )}
                         </View>
@@ -225,19 +193,19 @@ const userPage = () => {
                             </TouchableOpacity>
                         </View>
                     </ScrollView>
+
                     <View style={{ position: 'absolute', bottom: 70, left: 20, right: 20 }}>
-                        <TouchableOpacity
-                            onPress={handleLogout}
-                            style={userStyle.logoutButton}
-                        >
+                        <TouchableOpacity onPress={handleLogout} style={userStyle.logoutButton} testID="logout-button">
                             <Text style={{ color: 'white', fontWeight: 'bold' }}>Logout</Text>
                         </TouchableOpacity>
                     </View>
+
                     <BotNavBar />
                 </View>
             </SafeAreaView>
         </SafeAreaProvider>
     );
-    };
+};
 
-export default userPage;
+export default UserPage;
+

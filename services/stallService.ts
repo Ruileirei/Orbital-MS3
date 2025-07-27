@@ -1,6 +1,5 @@
-// services/stallService.ts
 import { auth, db } from '@/firebase/firebaseConfig';
-import { collection, doc, getDoc, getDocs, increment, limit, orderBy, query, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 
 export async function fetchAllStallsFromFirestore() {
   const queryRes = await getDocs(collection(db, 'stalls'));
@@ -36,7 +35,6 @@ export async function getPreviewReviews(stallId: string) {
 
 export async function addReviewForStall(
   stallId: string,
-  stallName: string,
   rating: number,
   comment: string
 ) {
@@ -45,8 +43,14 @@ export async function addReviewForStall(
   }
 
   const uid = auth.currentUser.uid;
-  const userDoc = await getDoc(doc(db, "users", uid));
+
+  const [userDoc, stallDoc] = await Promise.all([
+    getDoc(doc(db, "users", uid)),
+    getDoc(doc(db, "stalls", stallId))
+  ]);
+
   const userName = userDoc.exists() ? userDoc.data().username : "Anonymous";
+  const stallName = stallDoc.exists() ? stallDoc.data().name : "Undefined";
 
   const review = {
     rating,
@@ -55,19 +59,30 @@ export async function addReviewForStall(
     userName,
     uid,
   };
-  await setDoc(
-    doc(db, "stalls", stallId, "reviews", uid),
-    review
-  );
-  await setDoc(
-    doc(db, "userReviews", uid, "reviews", stallId),
-    {
-      ...review,
-      stallId,
-      stallName,
-    }
-  );
-  await updateStallRatingAfterReview(stallId, rating);
+
+  try {
+    // Update stall rating and numberOfReviews first
+    await updateStallRatingAfterReview(stallId, rating);
+
+    // Then write the review documents
+    await setDoc(
+      doc(db, "stalls", stallId, "reviews", uid),
+      review
+    );
+
+    await setDoc(
+      doc(db, "userReviews", uid, "reviews", stallId),
+      {
+        ...review,
+        stallId,
+        stallName,
+      }
+    );
+
+  } catch (error) {
+    console.error("Error adding review:", error);
+    throw error;
+  }
 }
 
 
@@ -76,48 +91,80 @@ export async function updateStallRatingAfterReview(
   stallId: string,
   newRating: number
 ) {
-  const stallRef = doc(db, 'stalls', stallId);
-  const stallSnap = await getDoc(stallRef);
-
-  if (!stallSnap.exists()) {
-    throw new Error('Stall does not exist');
-  }
-
-  const data = stallSnap.data();
-  let oldAverage = data.rating ?? 0;
-  let oldCount = data.numberOfReviews ?? 0;
-
-  const uid = auth.currentUser?.uid;
-  if (!uid) {
+  console.log('[1] Starting updateStallRatingAfterReview for stall:', stallId);
+  
+  if (!auth.currentUser?.uid) {
+    console.error('[2] No authenticated user');
     throw new Error('User not authenticated');
   }
 
+  const uid = auth.currentUser.uid;
+  const stallRef = doc(db, 'stalls', stallId);
   const userReviewRef = doc(db, "stalls", stallId, "reviews", uid);
-  const userReviewSnap = await getDoc(userReviewRef);
 
-  let newAverage;
-  if (userReviewSnap.exists()) {
-    const oldUserRating = userReviewSnap.data().rating ?? 0;
+  try {
+    console.log('[3] Fetching stall and review data...');
+    const [stallSnap, userReviewSnap] = await Promise.all([
+      getDoc(stallRef),
+      getDoc(userReviewRef)
+    ]);
 
-    const sum = oldAverage * oldCount;
-    const newSum = sum - oldUserRating + newRating;
-    newAverage = newSum / oldCount;
+    if (!stallSnap.exists()) {
+      console.error('[4] Stall does not exist');
+      throw new Error('Stall does not exist');
+    }
 
-  
-    await updateDoc(stallRef, {
-      rating: newAverage,
+    const stallData = stallSnap.data();
+    console.log('[5] Current stall data:', {
+      rating: stallData.rating,
+      numberOfReviews: stallData.numberOfReviews
     });
 
-  } else {
-    const sum = oldAverage * oldCount;
-    const newSum = sum + newRating;
-    const newCount = oldCount + 1;
-    newAverage = newSum / newCount;
+    const oldAverage = stallData.rating || 0;
+    const oldCount = stallData.numberOfReviews || 0;
+    const userHadPreviousReview = userReviewSnap.exists();
+    const oldUserRating = userHadPreviousReview ? userReviewSnap.data().rating : 0;
 
-    await updateDoc(stallRef, {
-      rating: newAverage,
-      numberOfReviews: increment(1),
+    console.log('[6] Calculation inputs:', {
+      oldAverage,
+      oldCount,
+      userHadPreviousReview,
+      oldUserRating
     });
+
+    let newAverage, newCount;
+    if (userHadPreviousReview) {
+      newCount = oldCount;
+      newAverage = ((oldAverage * oldCount) - oldUserRating + newRating) / oldCount;
+    } else {
+      newCount = oldCount + 1;
+      newAverage = ((oldAverage * oldCount) + newRating) / newCount;
+    }
+
+    console.log('[7] Calculated new values:', {
+      newAverage,
+      newCount
+    });
+
+    const updateData: { rating: number; numberOfReviews?: number } = {
+      rating: newAverage
+    };
+
+    if (!userHadPreviousReview) {
+      updateData.numberOfReviews = newCount;
+    }
+
+    console.log('[8] Attempting to update with:', updateData);
+    await updateDoc(stallRef, updateData);
+    console.log('[9] Update successful!');
+
+    // Verify the update
+    const updatedStall = await getDoc(stallRef);
+    console.log('[10] Updated stall data:', updatedStall.data());
+    
+  } catch (error) {
+    console.error('[ERROR] In updateStallRatingAfterReview:', error);
+    throw error;
   }
 }
 
