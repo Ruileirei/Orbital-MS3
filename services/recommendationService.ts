@@ -29,21 +29,34 @@ export const getCuisineBasedRecommendations = async (userId: string): Promise<St
         );
         const validPositiveStalls = positiveStalls.filter(Boolean) as Stall[];
 
-        // Calculate top cuisines
+        const savedStalls = await Promise.all(
+            savedIds.map(async (stallId) => {
+                const stallDoc = await getDoc(doc(db, 'stalls', stallId));
+                return stallDoc.exists() ? { id: stallDoc.id, ...stallDoc.data() } as Stall : null;
+            })
+        );
+
+        const combinedStalls = [...validPositiveStalls, ...savedStalls.filter(Boolean)];
+
+        const stallMap = new Map<string, Stall>();
+        combinedStalls.forEach(stall => {
+        if (stall && stall.id) stallMap.set(stall.id, stall);
+        });
+        const uniqueStalls = Array.from(stallMap.values());
+
         const cuisineCount: Record<string, number> = {};
-        validPositiveStalls.forEach(stall => {
-            const cuisine = stall.cuisine || '';
-            if (cuisine) cuisineCount[cuisine] = (cuisineCount[cuisine] || 0) + 1;
+        uniqueStalls.forEach(stall => {
+        const cuisine = stall.cuisine || '';
+        if (cuisine) cuisineCount[cuisine] = (cuisineCount[cuisine] || 0) + 1;
         });
 
         const topCuisines = Object.entries(cuisineCount)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 2)
-            .map(([cuisine]) => cuisine);
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 2)
+        .map(([cuisine]) => cuisine);
 
         if (topCuisines.length === 0) return [];
 
-        // Get recommendations (excluding favorites & all reviews)
         const recommendations: Stall[] = [];
         
         for (const cuisine of topCuisines) {

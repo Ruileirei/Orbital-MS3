@@ -82,6 +82,7 @@ const Register = () => {
                         <TextInput 
                             style={RegisterStyle.input}
                             placeholder="Username"
+                            placeholderTextColor={"grey"}
                             value={username} 
                             onChangeText={setUsername} 
                             autoCapitalize="none"
@@ -89,6 +90,7 @@ const Register = () => {
 
                         <TextInput 
                             placeholder="Email" 
+                            placeholderTextColor={"grey"}
                             style={RegisterStyle.input} 
                             value={email} 
                             onChangeText={setEmail} 
@@ -98,6 +100,7 @@ const Register = () => {
 
                         <TextInput 
                             placeholder="Password" 
+                            placeholderTextColor={"grey"}
                             style={RegisterStyle.input} 
                             value={password} 
                             onChangeText={setPassword} 

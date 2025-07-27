@@ -113,6 +113,7 @@ const EditProfile = () => {
                 placeholder="Enter new name"
                 value={name}
                 onChangeText={setName}
+                placeholderTextColor={"grey"}
                 style={{
                     borderWidth: 1,
                     borderColor: '#ccc',
@@ -125,6 +126,7 @@ const EditProfile = () => {
                 placeholder="Enter new email"
                 value={email}
                 onChangeText={setemail}
+                placeholderTextColor={"grey"}
                 style={{
                     borderWidth: 1,
                     borderColor: '#ccc',
@@ -137,6 +139,7 @@ const EditProfile = () => {
                 placeholder="Enter new password"
                 value={password}
                 onChangeText={setPassword}
+                placeholderTextColor={"grey"}
                 style={{
                     borderWidth: 1,
                     borderColor: '#ccc',
