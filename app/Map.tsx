@@ -195,6 +195,7 @@ const MapScreen = () => {
                     <TouchableOpacity
                         style={MapStyle.mapSearchBar}
                         onPress={() => router.push('/searchOptions')}
+                        testID="searchbar-button"
                     >
                         <Feather name="search" size={20} color='gray'/>
                         <Text style={{marginLeft: 10, color: 'gray'}}>Search for places...</Text>

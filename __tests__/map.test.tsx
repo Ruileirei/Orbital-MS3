@@ -96,8 +96,8 @@ describe('MapScreen', () => {
     (getDocs as jest.Mock).mockResolvedValue({ docs: [] });
     render(<MapScreen />);
 
-    const searchButton = await screen.findByText(/Search for places/i);
-    fireEvent.press(searchButton.parent);
+    const searchButton = await screen.findByTestId("searchbar-button")
+    fireEvent.press(searchButton);
 
     expect(mockPush).toHaveBeenCalledWith('/searchOptions');
   });
